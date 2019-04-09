@@ -31,38 +31,41 @@
     </div>
   </div> -->
   <div class="body">
-    <scroll-view v-for="(item,index) in arr" :key="index" scroll-y="true" class="main-scroll-container">
-      <div class="scroll-view-item">
+    <div class="main-scroll-container">
+      <div class="scroll-view-item" v-for="(item,index) in list" :key="index" v-on:click="clickHandler(item.positionId)">
         <div class="item-box">
           <div class="item-header">
-            <span class="name">前端开发工程师</span>
-            <span class="salary">10k-20k</span>
+            <span class="name">{{item.name}}</span>
+            <span class="salary">{{item.salary}}</span>
           </div>
           <div class="item-header-sm">
-            <span class="area-year-edu">滨江区|3-5年|本科</span>
-            <span class="date">04月06日</span>
+            <span class="area-year-edu">{{item.area}} | {{item.workYear}} | {{item.education}} </span>
+            <span class="date">{{item.formatTime}}</span>
           </div>
           <div class="item-label">
-            <span>移动互联网</span>
-            <span>html5</span>
+            <span v-for="(i,idx) in item.industryLables" :key="idx">{{i}}</span>
           </div>
           <div class="item-footer">
             <div class="company-img-box">
-              <img src="https://www.lgstatic.com/thumbnail_120x120/i/image3/M00/19/43/Cgq2xlp5AX-AL3-fAABe3g0jN-g364.png" alt="">
+              <img :src="item.companyLogo">
             </div>
             <div class="company-info">
-              <p class="company-name">八东通科技</p>
-              <p class="company-label">A轮 | 150-500人 | 移动互联网</p>
+              <p class="company-name">{{item.companyName}}</p>
+              <p class="company-label">{{item.financeStage}} | {{item.companySize}} | <span v-for="(i,idx) in item.industryField" :key="idx">{{i}} </span></p>
             </div>
           </div>
         </div>
       </div>
-    </scroll-view>
+    </div>
+    <!-- <div class="top">
+      <img class="top-icon" src="/static/images/top.png" >
+    </div> -->
   </div>
 </template>
 
 <script>
 import card from '@/components/card'
+import {devApi} from '@/utils/index'
 
 export default {
   data () {
@@ -72,23 +75,8 @@ export default {
         nickName: 'mpvue',
         avatarUrl: 'http://mpvue.com/assets/logo.png'
       },
-      arr: [
-        {name: 'x'},
-        {name: 'x'},
-        {name: 'x'},
-        {name: 'x'},
-        {name: 'x'},
-        {name: 'x'},
-        {name: 'x'},
-        {name: 'x'},
-        {name: 'x'},
-        {name: 'x'},
-        {name: 'x'},
-        {name: 'x'},
-        {name: 'x'},
-        {name: 'x'},
-        {name: 'x'}
-      ]
+      pageNo: 1,
+      list: []
     }
   },
 
@@ -97,38 +85,121 @@ export default {
   },
 
   methods: {
-    bindViewTap () {
-      const url = '../logs/main'
-      if (mpvuePlatform === 'wx') {
-        mpvue.switchTab({ url })
-      } else {
-        mpvue.navigateTo({ url })
-      }
+    // bindViewTap () {
+    //   const url = '../logs/main'
+    //   if (mpvuePlatform === 'wx') {
+    //     mpvue.switchTab({ url })
+    //   } else {
+    //     mpvue.navigateTo({ url })
+    //   }
+    // },
+    clickHandler (index, e) {
+      console.log('clickHandle:', index)
+      var url = "../detail/main?id=" +index
+      wx.navigateTo({url})
     },
-    clickHandle (ev) {
-      console.log('clickHandle:', ev)
-      // throw {message: 'custom test'}
+    getList () {
+      let pageNo = this.pageNo;
+      // let pageSize = this.pageSize;
+      wx.showLoading({
+        title: '玩命加载中',
+      })
+      return new Promise((resolve, reject) => {
+        wx.request({
+          url: `${devApi}/wx/pageList`,
+          method: 'POST',
+          data: JSON.stringify({
+            pageNo: pageNo
+          }),
+          header: {
+            'content-type': 'application/json'
+          },
+          success: function (res) {
+            wx.hideLoading();
+            resolve(res.data);
+          },
+          fail: function (res) {
+            wx.hideLoading();
+          },
+          complete: function () {
+            wx.hideLoading();
+          }
+        })
+      }).then((res) => {
+        if (res.success) {
+          this.list = [...this.list, ...res.result.data]
+        }
+      })
+    },
+    refreshList () {
+      wx.showLoading({
+        title: '玩命加载中',
+      })
+      return new Promise((resolve, reject) => {
+        wx.request({
+          url: `${devApi}/wx/pageList`,
+          method: 'POST',
+          data: JSON.stringify({
+            pageNo: 1
+          }),
+          header: {
+            'content-type': 'application/json'
+          },
+          success: function (res) {
+            wx.hideLoading();
+            resolve(res.data);
+          },
+          fail: function (res) {
+            wx.hideLoading();
+          },
+          complete: function () {
+            wx.hideLoading();
+          }
+        })
+      }).then((res) => {
+        if (res.success) {
+          this.list = res.result.data
+        }
+      })
     }
   },
 
+  async onPullDownRefresh() {
+    console.log('下拉刷新')
+    this.refreshList();
+    wx.stopPullDownRefresh();
+  },
+  onReachBottom: function () {
+    console.log('上拉加载')
+    this.getList();
+  },
+
+  mounted () {
+    this.refreshList()
+  },
+
   created () {
-    // let app = getApp()
+    let app = getApp()
   }
 }
 </script>
 
 <style lang='less' scoped>
 .body {
+  // font-family: 'Microsoft YaHei';
   .main-scroll-container {
     .scroll-view-item {
       background: #e0e0e0;
-      padding: 10rpx 0;
+      padding: 2rpx 0;
       .item-box {
         background: #FFF;
-        padding: 10rpx 20rpx;
+        padding: 20rpx 20rpx 10rpx 20rpx;
         .item-header {
+          height: 30rpx;
+          line-height: 30rpx;
           .name {
-            font-size: 16px;
+            float: left;
+            font-size: 14px;
             font-weight: 700;
           }
           .salary {
@@ -140,8 +211,12 @@ export default {
         }
         .item-header-sm {
           font-size: 12px;
+          height: 30rpx;
+          line-height: 30rpx;
+          margin-top: 10rpx;
           .area-year-edu {
             color: #666666;
+            float: left;
           }
           .date {
             color: #999999;
@@ -153,18 +228,20 @@ export default {
             display: inline-block;
             padding: 4rpx 8rpx;
             margin-right: 10rpx;
-            background: #e7e7e7;
-            border-radius: 4rpx;
-            color: #666666;
+            background: #FFF;
+            border: 1px #14c4bb solid;
+            border-radius: 4px;
+            color: #14c4bb;
             font-size: 10px;
           }
         }
         .item-footer {
-          padding: 10rpx 0;
-          // height: 88rpx;
+          padding: 20rpx 0 10rpx 0;
+          position: relative;
           .company-img-box {
             display: inline-block;
             img {
+              border: 1rpx #d4d4d4 solid;
               width: 80rpx;
               height: 80rpx;
             }
@@ -172,8 +249,8 @@ export default {
           .company-info {
             display: inline-block;
             margin-left: 20rpx;
-            height: 80rpx;
-            // padding: 10rpx 5rpx;
+            position: absolute;
+            // top: 18rpx;
             .company-name {
               font-size: 14px;
             }
@@ -186,6 +263,17 @@ export default {
       }
     }
   }
+  // .top {
+  //   position: fixed;
+  //   bottom: 40rpx;
+  //   right: 20rpx;
+  //   background: #FFF;
+  //   border-radius: 50rpx;
+  //   .top-icon {
+  //     width: 100rpx;
+  //     height: 100rpx;
+  //   }
+  // }
 }
 /* .userinfo {
   display: flex;

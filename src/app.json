@@ -1,7 +1,10 @@
 {
   "pages": [
     "pages/index/main",
-    "pages/logs/main"  ],
+    "pages/logs/main",
+    "pages/detail/main",
+    "pages/my/main"
+  ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#fff",
@@ -21,9 +24,9 @@
       "selectedIconPath": "static/tabs/home-active.png"
     }, {
       "text": "我",
-      "pagePath": "pages/logs/main",
-      "iconPath": "static/tabs/orders.png",
-      "selectedIconPath": "static/tabs/orders-active.png"
+      "pagePath": "pages/my/main",
+      "iconPath": "static/tabs/my.png",
+      "selectedIconPath": "static/tabs/my-active.png"
     }],
 
     "items": [{
@@ -33,9 +36,9 @@
       "activeIcon": "static/tabs/home-active.png"
     }, {
       "name": "我",
-      "pagePath": "pages/logs/main",
-      "icon": "static/tabs/orders.png",
-      "activeIcon": "static/tabs/orders-active.png"
+      "pagePath": "pages/my/main",
+      "icon": "static/tabs/my.png",
+      "activeIcon": "static/tabs/my-active.png"
     }],
     "position": "bottom"
   }
