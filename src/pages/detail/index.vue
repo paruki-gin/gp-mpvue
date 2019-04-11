@@ -1,14 +1,14 @@
 <template>
-  <div class="body">
+  <div class="body" v-if="data.name">
     <!--概述-->
     <div class="summary">
       <div class="left">
-        <p class="name">前端开发</p>
-        <p class="info">杭州·下城区 | 3-5年 | 本科 | 全职</p>
-        <p class="salary">9k-18k</p>
+        <p class="name">{{data.name}}</p>
+        <p class="info">{{data.city}}·{{data.area}} | {{data.workYear}} | {{data.education}} | 全职</p>
+        <p class="salary">{{data.salary}}</p>
       </div>
       <div class="right">
-        <img src="https://www.lgstatic.com/thumbnail_120x120/i/image3/M00/19/43/Cgq2xlp5AX-AL3-fAABe3g0jN-g364.png">
+        <img :src="data.companyLogo">
       </div>
     </div>
     <!--职位发布者-->
@@ -16,13 +16,12 @@
     <div class="info">
       <div class="first">
         <p class="title">职位亮点</p>
-        <p class="advantage">扁平化管理地铁口五险一金</p>
+        <p class="advantage">{{data.positionAdvantage}}</p>
       </div>
       <div class="second">
         <p class="title">职位描述</p>
         <div class="label">
-          <span>前端开发</span>
-          <span>html</span>
+          <span v-for="(item, index) in data.industryField" :key='index'>{{item}}</span>
         </div>
         <div class="job-detail">
         <p>工岗位职责<br>1、负责公司产品前端的开发工作，按计划完成任务；<br>2、负责调试、解决不同终端、不同浏览器下的兼容性问题；<br>3、HTML5的开发，用户体验优化，各项性能的调优等；<br>4、编写和维护技术文档。</p>
@@ -35,17 +34,15 @@
     <div class="work_addr">
       <div class="title">公司信息</div>
       <div class="addr-text">
-        <a rel="nofollow" href="https://www.lagou.com/jobs/list_?city=杭州#filterBox">杭州</a> -
-        <a rel="nofollow" href="https://www.lagou.com/jobs/list_?city=杭州&amp;district=西湖区#filterBox">西湖区</a> -
-        <a rel="nofollow" href="https://www.lagou.com/jobs/list_?city=杭州&amp;district=西湖区&amp;bizArea=西溪#filterBox">西溪</a>- 天堂软件园A幢18层
+        <p>{{data.city}} - {{data.area}} - bizArea - xxxxx</p>
       </div>
-      <div class="company-card">
+      <div class="company-card" v-on:click="clickCopyCompanyUrlHandler">
         <div class="company-info">
-          <p class="company-name">八东通科技</p>
-          <p class="company-label">A轮 | 150-500人 | 移动互联网</p>
+          <p class="company-name">{{data.companyName}}</p>
+          <p class="company-label">{{data.financeStage}} | {{data.companySize}} | <span v-for="(item, index) in data.industryField" :key='index'>{{item}}</span></p>
         </div>
         <div class="company-img-box">
-          <img src="https://www.lgstatic.com/thumbnail_120x120/i/image3/M00/19/43/Cgq2xlp5AX-AL3-fAABe3g0jN-g364.png">
+          <img :src="data.companyLogo">
         </div>
       </div>
     </div>
@@ -54,9 +51,11 @@
         <span v-on:click="colleHandler">收藏</span>
       </div>
       <div class="goto">
-        <span v-on:click="gotoHandler">查看</span>
+        <span v-on:click="clickCopyJobUrlHandler">复制链接</span>
       </div>
     </div>
+  </div>
+  <div v-else>
   </div>
 </template>
 
@@ -64,7 +63,7 @@
 export default {
   data () {
     return {
-      contents:'这是可以复制的文字,粘贴后即可看到效果'
+      data: {}
     }
   },
 
@@ -75,25 +74,64 @@ export default {
     colleHandler() {
       console.log('收藏')
     },
-    gotoHandler(e) {
-      console.log(e)
+    clickCopyJobUrlHandler(e) {
       wx.setClipboardData({
-        data: this.contents,
+        data: this.data.detailLink,
         success: function (res) {
           wx.getClipboardData({
             success: function (res) {
               wx.showToast({
-                title: '复制成功'
+                title: '复制职位链接'
               })
             }
           })
+        }
+      })
+    },
+    clickCopyCompanyUrlHandler(e) {
+      wx.setClipboardData({
+        data: this.data.companyUrl,
+        success: function (res) {
+          wx.getClipboardData({
+            success: function (res) {
+              wx.showToast({
+                title: '复制公司链接'
+              })
+            }
+          })
+        }
+      })
+    },
+    getJobData(id) {
+      this.$httpWX.get({
+        url: '/wx/getJobDetail',
+        data: {
+          id: id
+        }
+      }).then(res => {
+        if (res.success) {
+          this.data = res.result;
+        }
+      })
+    },
+    getUserInfo() {
+      this.$httpWX.get({
+        url: '/wx/getUserInfo'
+      }).then(res => {
+        if (res.success) {
+          console.log('已登录');
+        } else {
+          console.log('未登录');
         }
       })
     }
   },
 
   mounted () {
-    console.log(this.$root.$mp.query)
+    this.data={};
+    const query = this.$root.$mp.query;
+    this.getUserInfo()
+    this.getJobData(query.id)
   },
 
   created () {
@@ -107,12 +145,12 @@ export default {
   padding: 10rpx 20rpx 100rpx 20rpx;
   .summary {
     padding: 10rpx;
-    height: 120rpx;
     padding: 10rpx 20rpx;
     border: 2rpx #d4d4d4 solid;
     border-radius: 4rpx;
     box-shadow: 0px 0px 2px #d4d4d4;
     .left {
+      width: 80%;
       float: left;
       .name {
         font-size: 18px;
@@ -135,6 +173,12 @@ export default {
         height: 80rpx;
       }
     }
+  }
+  .summary::after {
+    display: block;
+    height: 0;
+    clear: both;
+    content: '';
   }
   .info {
     // margin: 40rpx 20rpx 0 20rpx;

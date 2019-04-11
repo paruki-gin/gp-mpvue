@@ -32,7 +32,7 @@
   </div> -->
   <div class="body">
     <div class="main-scroll-container">
-      <div class="scroll-view-item" v-for="(item,index) in list" :key="index" v-on:click="clickHandler(item.positionId)">
+      <div class="scroll-view-item" v-for="(item,index) in list" :key="index" v-on:click="clickHandler(item._id)">
         <div class="item-box">
           <div class="item-header">
             <span class="name">{{item.name}}</span>
@@ -65,16 +65,15 @@
 
 <script>
 import card from '@/components/card'
-import {devApi} from '@/utils/index'
 
 export default {
   data () {
     return {
-      motto: 'Hello miniprograme',
-      userInfo: {
-        nickName: 'mpvue',
-        avatarUrl: 'http://mpvue.com/assets/logo.png'
-      },
+      // motto: 'Hello miniprograme',
+      // userInfo: {
+      //   nickName: 'mpvue',
+      //   avatarUrl: 'http://mpvue.com/assets/logo.png'
+      // },
       pageNo: 1,
       list: []
     }
@@ -93,70 +92,32 @@ export default {
     //     mpvue.navigateTo({ url })
     //   }
     // },
-    clickHandler (index, e) {
-      console.log('clickHandle:', index)
-      var url = "../detail/main?id=" +index
+    clickHandler(id, e) {
+      var url = "../detail/main?id=" +id
       wx.navigateTo({url})
     },
-    getList () {
+    getList() {
+      this.pageNo += 1;
       let pageNo = this.pageNo;
       // let pageSize = this.pageSize;
-      wx.showLoading({
-        title: '玩命加载中',
-      })
-      return new Promise((resolve, reject) => {
-        wx.request({
-          url: `${devApi}/wx/pageList`,
-          method: 'POST',
-          data: JSON.stringify({
-            pageNo: pageNo
-          }),
-          header: {
-            'content-type': 'application/json'
-          },
-          success: function (res) {
-            wx.hideLoading();
-            resolve(res.data);
-          },
-          fail: function (res) {
-            wx.hideLoading();
-          },
-          complete: function () {
-            wx.hideLoading();
-          }
-        })
-      }).then((res) => {
+      this.$httpWX.post({
+        url: '/wx/pageList',
+        data: {
+          pageNo: pageNo
+        }
+      }).then(res => {
         if (res.success) {
           this.list = [...this.list, ...res.result.data]
         }
       })
     },
-    refreshList () {
-      wx.showLoading({
-        title: '玩命加载中',
-      })
-      return new Promise((resolve, reject) => {
-        wx.request({
-          url: `${devApi}/wx/pageList`,
-          method: 'POST',
-          data: JSON.stringify({
-            pageNo: 1
-          }),
-          header: {
-            'content-type': 'application/json'
-          },
-          success: function (res) {
-            wx.hideLoading();
-            resolve(res.data);
-          },
-          fail: function (res) {
-            wx.hideLoading();
-          },
-          complete: function () {
-            wx.hideLoading();
-          }
-        })
-      }).then((res) => {
+    refreshList() {
+      this.$httpWX.post({
+        url: '/wx/pageList',
+        data: {
+          pageNo: 1
+        }
+      }).then(res => {
         if (res.success) {
           this.list = res.result.data
         }
@@ -170,7 +131,7 @@ export default {
     wx.stopPullDownRefresh();
   },
   onReachBottom: function () {
-    console.log('上拉加载')
+    console.log('上划加载')
     this.getList();
   },
 

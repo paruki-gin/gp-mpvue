@@ -18,24 +18,20 @@
     "borderStyle": "white",
 
     "list": [{
-      "text": "首页",
       "pagePath": "pages/index/main",
       "iconPath": "static/tabs/home.png",
       "selectedIconPath": "static/tabs/home-active.png"
     }, {
-      "text": "我",
       "pagePath": "pages/my/main",
       "iconPath": "static/tabs/my.png",
       "selectedIconPath": "static/tabs/my-active.png"
     }],
 
     "items": [{
-      "name": "首页",
       "pagePath": "pages/index/main",
       "icon": "static/tabs/home.png",
       "activeIcon": "static/tabs/home-active.png"
     }, {
-      "name": "我",
       "pagePath": "pages/my/main",
       "icon": "static/tabs/my.png",
       "activeIcon": "static/tabs/my-active.png"

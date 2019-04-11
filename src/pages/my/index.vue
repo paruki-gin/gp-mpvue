@@ -2,12 +2,13 @@
   <div class="body">
     <div class="user" v-on:click="userHandler">
       <div class="icon">
-        <img src="/static/images/user.png">
+        <img :src="userInfo.avatarUrl">
       </div>
       <div class="info">
-        <p class="login-btn">点击登录</p>
-        <p class="tip">登录发现更多</p>
+        <p class="login-btn">{{userInfo.nickName ? userInfo.nickName : '点击登录'}}</p>
+        <p class="tip">{{userInfo.nickName ? '&nbsp;' : '登录发现更多'}}</p>
       </div>
+      <!-- <button open-type="getUserInfo" @getuserinfo="bindGetUserInfo" @click="getUserInfoClick">获取权限</button> -->
     </div>
     <div class="door">
       <div class="collection" v-on:click="collectionHandler">
@@ -33,11 +34,64 @@ export default {
 
   data () {
     return {
-      logs: []
+      logs: [],
+      userInfo: {
+        avatarUrl: '/static/images/user.png',
+        nickName: ''
+      }
     }
   },
 
   methods: {
+    wxGetUserInfo (code) {
+      const self = this;
+      wx.getUserInfo({
+        withCredentials: true,
+        success (res) {
+          let { encryptedData,userInfo,iv } = res;
+          self.$httpWX.post({
+            url: "/wx/login",
+            data: {
+              code,
+              encryptedData,
+              iv
+            }
+          }).then((res, header) => {
+            console.log(res);
+            self.userInfo = res.data;
+            wx.setStorageSync('sessionId', res.data.sessionId)
+          }).catch(err => {
+            console.log(err);
+          })
+        },
+        fail (err) {
+          console.log(err);
+          self.buttonVisible = true;
+        }
+      })
+    },
+    bindGetUserInfo(e) {
+      // console.log('回调事件后触发')
+      const self = this;
+      if (e.mp.detail.userInfo){
+        console.log('允许')
+        let { encryptedData,userInfo,iv } = e.mp.detail;
+        self.$httpWX.post({
+          url: "/wx/login",
+          data: {
+            code: self.code,
+            encryptedData,
+            iv
+          }
+        }).then(res => {
+            console.log(res);
+        }).catch(err => {
+            console.log(err);
+        })
+      } else {
+        console.log('拒绝');
+      }
+    },
     userHandler() {
       console.log('login');
     },
@@ -47,6 +101,21 @@ export default {
     aboutHandler() {
       console.log('about');
     }
+  },
+
+  mounted () {
+    const self = this;
+    wx.login({
+      success (res) {
+        if (res.code){
+          self.code = res.code;
+          console.log('res.code', res.code);
+          self.wxGetUserInfo(res.code);
+        } else {
+          console.log('登录失败！' + res.errMsg)
+        }
+      }
+    })
   },
 
   created () {
@@ -66,7 +135,7 @@ export default {
       img {
         width: 100rpx;
         height: 100rpx;
-        border: 1px #666666 solid;
+        // border: 1px #666666 solid;
         border-radius: 50rpx;
         background: #3b3b3b;
       }

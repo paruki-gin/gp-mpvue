@@ -18,10 +18,7 @@ export function formatTime (date) {
   return `${t1} ${t2}`
 }
 
-export let devApi = 'http://192.168.123.1:3000/api';
-
 export default {
   formatNumber,
-  formatTime,
-  devApi
+  formatTime
 }

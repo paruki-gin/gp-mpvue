@@ -1,5 +1,21 @@
 <script>
 export default {
+  methods: {
+
+  },
+  mounted () {
+    // wx.login({
+    //   success: function(res) {
+    //     var code = res.code;
+    //     if (code) {
+    //       console.log('获取用户登录凭证：' + code);
+    //     } else {
+    //       console.log('获取用户登录态失败：' + res.errMsg);
+    //     }
+    //   }
+    // });
+    // this.getUserInfo()
+  },
   created () {
     // 调用API从本地缓存中获取数据
     /*
