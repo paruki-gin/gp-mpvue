@@ -65,6 +65,7 @@
 
 <script>
 import card from '@/components/card'
+import timestamp from '@/utils/timestamp'
 
 export default {
   data () {
@@ -92,6 +93,27 @@ export default {
     //     mpvue.navigateTo({ url })
     //   }
     // },
+    // timestamp(str) {
+    //   console.log(this.$timestamp(str));
+    // },
+    timestamp(timestamp) {
+      const change = function (t) {
+        if (t < 10) {
+            return "0" + t;
+        } else {
+            return t;
+        }
+      }
+      let date = new Date(+timestamp);
+      let Y = date.getFullYear() + '-';
+      let M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+      let D = change(date.getDate()) + ' ';
+      let h = change(date.getHours()) + ':';
+      let m = change(date.getMinutes()) + ':';
+      let s = change(date.getSeconds());
+      return (Y + M + D + h + s);
+    },
+
     clickHandler(id, e) {
       var url = "../detail/main?id=" +id
       wx.navigateTo({url})
@@ -107,6 +129,9 @@ export default {
         }
       }).then(res => {
         if (res.success) {
+          res.result.data.forEach((curr, index, arr) => {
+            curr.formatTime = this.timestamp(curr.formatTime)
+          })
           this.list = [...this.list, ...res.result.data]
         }
       })
@@ -119,6 +144,9 @@ export default {
         }
       }).then(res => {
         if (res.success) {
+          res.result.data.forEach((curr, index, arr) => {
+            curr.formatTime = this.timestamp(curr.formatTime)
+          })
           this.list = res.result.data
         }
       })

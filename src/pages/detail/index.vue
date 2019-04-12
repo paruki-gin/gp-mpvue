@@ -4,7 +4,7 @@
     <div class="summary">
       <div class="left">
         <p class="name">{{data.name}}</p>
-        <p class="info">{{data.city}}·{{data.area}} | {{data.workYear}} | {{data.education}} | 全职</p>
+        <p class="info">{{data.city}}·{{data.area}} | {{data.workYear}} | {{data.education}}</p>
         <p class="salary">{{data.salary}}</p>
       </div>
       <div class="right">
@@ -23,18 +23,14 @@
         <div class="label">
           <span v-for="(item, index) in data.industryField" :key='index'>{{item}}</span>
         </div>
-        <div class="job-detail">
-        <p>工岗位职责<br>1、负责公司产品前端的开发工作，按计划完成任务；<br>2、负责调试、解决不同终端、不同浏览器下的兼容性问题；<br>3、HTML5的开发，用户体验优化，各项性能的调优等；<br>4、编写和维护技术文档。</p>
-        <p>任职资格</p>
-        <p>1、计算机软件及相关专业，本科学历，3年以上前端开发经验，有Html5开发经验；<br>2、熟悉前端核心技术，包括XHTML/XML/CSS/Javascript/Ajax等；<br>3、熟悉Jquery、vue.js、reactJS类库框架中的至少一种；<br>4、熟悉HTML5（响应式布局），能够解决多类型终端，多浏览器兼容问题；<br>5、了解一门非前端的语言（如Java/PHP/NodeJS）；<br>6、能够优化代码并保持良好兼容性，对用户体验、交互操作流程、及用户需求有深入理解；<br>7、具备良好的服务意识、责任心、较强的学习能力、优秀的团队沟通与协作能力；</p>
-        </div>
+        <div class="job-detail" v-html="data.jobDetail"></div>
       </div>
     </div>
     <!--地址-->
     <div class="work_addr">
       <div class="title">公司信息</div>
       <div class="addr-text">
-        <p>{{data.city}} - {{data.area}} - bizArea - xxxxx</p>
+        <p>{{data.workAddr}}</p>
       </div>
       <div class="company-card" v-on:click="clickCopyCompanyUrlHandler">
         <div class="company-info">
