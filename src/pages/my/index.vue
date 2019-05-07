@@ -5,7 +5,8 @@
         <img :src="userInfo.avatarUrl">
       </div>
       <div class="info">
-        <p class="login-btn">{{userInfo.nickName ? userInfo.nickName : '点击登录'}}</p>
+        <p class="login-btn" v-if="userInfo.nickName">{{userInfo.nickName}}</p>
+        <p class="login-btn" @click="bindLogin" v-else>点击登录</p>
         <p class="tip">{{userInfo.nickName ? '&nbsp;' : '登录发现更多'}}</p>
       </div>
       <!-- <button open-type="getUserInfo" @getuserinfo="bindGetUserInfo" @click="getUserInfoClick">获取权限</button> -->
@@ -14,6 +15,11 @@
       <div class="collection" v-on:click="collectionHandler">
         <img class="btn-icon" src="/static/images/collection.png" >
         <span>收藏</span>
+        <img class="btn-icon next" src="/static/images/next.png" >
+      </div>
+      <div class="about" v-on:click="settingHandler">
+        <img class="btn-icon" src="/static/images/problem.png">
+        <span>设置</span>
         <img class="btn-icon next" src="/static/images/next.png" >
       </div>
       <div class="about" v-on:click="aboutHandler">
@@ -43,7 +49,7 @@ export default {
   },
 
   methods: {
-    wxGetUserInfo (code) {
+    bindLogin (code) {
       const self = this;
       wx.getUserInfo({
         withCredentials: true,
@@ -52,14 +58,24 @@ export default {
           self.$httpWX.post({
             url: "/wx/login",
             data: {
-              code,
+              code: self.code,
               encryptedData,
               iv
             }
           }).then((res, header) => {
-            console.log(res);
-            self.userInfo = res.data;
-            wx.setStorageSync('sessionId', res.data.sessionId)
+            if (res.success) {
+              self.userInfo = res.data;
+              wx.setStorageSync('user_token', res.data.token);
+              wx.showToast({
+                title: '登录成功',
+                icon: 'success',
+                duration: 2000
+              })
+            } else {
+              wx.showToast({
+                title: '登录失败'
+              })
+            }
           }).catch(err => {
             console.log(err);
           })
@@ -70,36 +86,58 @@ export default {
         }
       })
     },
-    bindGetUserInfo(e) {
-      // console.log('回调事件后触发')
+    getCurrentUserInfo () {
       const self = this;
-      if (e.mp.detail.userInfo){
-        console.log('允许')
-        let { encryptedData,userInfo,iv } = e.mp.detail;
-        self.$httpWX.post({
-          url: "/wx/login",
-          data: {
-            code: self.code,
-            encryptedData,
-            iv
-          }
-        }).then(res => {
-            console.log(res);
-        }).catch(err => {
-            console.log(err);
-        })
-      } else {
-        console.log('拒绝');
-      }
+      self.$httpWX.get({
+        url: "/wx/getUserInfo",
+        data: {
+          code: self.code
+        }
+      }).then((res) => {
+        console.log(res);
+        if (res.success) {
+          self.userInfo = res.data;
+        }
+      }).catch(err => {
+        console.log(err);
+      })
     },
-    userHandler() {
-      console.log('login');
+    // bindGetUserInfo(e) {
+    //   // console.log('回调事件后触发')
+    //   const self = this;
+    //   if (e.mp.detail.userInfo){
+    //     console.log('允许')
+    //     let { encryptedData,userInfo,iv } = e.mp.detail;
+    //     self.$httpWX.post({
+    //       url: "/wx/login",
+    //       data: {
+    //         code: self.code,
+    //         encryptedData,
+    //         iv
+    //       }
+    //     }).then(res => {
+    //         console.log(res);
+    //     }).catch(err => {
+    //         console.log(err);
+    //     })
+    //   } else {
+    //     console.log('拒绝');
+    //   }
+    // },
+    settingHandler() {
+      wx.navigateTo({
+        url: "../setting/main"
+      })
     },
     collectionHandler() {
-      console.log('collection');
+      wx.navigateTo({
+        url: "../collection/main"
+      })
     },
     aboutHandler() {
-      console.log('about');
+      wx.navigateTo({
+        url: "../about/main"
+      })
     }
   },
 
@@ -109,11 +147,12 @@ export default {
       success (res) {
         if (res.code){
           self.code = res.code;
-          console.log('res.code', res.code);
-          self.wxGetUserInfo(res.code);
         } else {
-          console.log('登录失败！' + res.errMsg)
+          wx.showToast({
+            title: '未知错误'
+          })
         }
+        self.getCurrentUserInfo();
       }
     })
   },

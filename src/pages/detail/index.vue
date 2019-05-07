@@ -44,7 +44,8 @@
     </div>
     <div class="footer">
       <div class="colle">
-        <span v-on:click="colleHandler">收藏</span>
+        <span v-if="isColled" v-on:click="colleHandler">取消收藏</span>
+        <span v-else v-on:click="colleHandler">收藏</span>
       </div>
       <div class="goto">
         <span v-on:click="clickCopyJobUrlHandler">复制链接</span>
@@ -59,7 +60,9 @@
 export default {
   data () {
     return {
-      data: {}
+      data: {
+      },
+      isColled: false
     }
   },
 
@@ -68,7 +71,42 @@ export default {
 
   methods: {
     colleHandler() {
-      console.log('收藏')
+      const self = this;
+      if (this.isColled) {
+        //取消收藏
+        self.$httpWX.get({
+          url: "/wx/delUserCollection",
+          data: {
+            id: self.data._id
+          }
+        }).then((res) => {
+          if (res.success) {
+            this.isColled = false;
+            wx.showToast({
+              title: '取消收藏成功'
+            })
+          }
+        }).catch(err => {
+          console.log(err);
+        })
+      } else {
+        //收藏
+        self.$httpWX.get({
+          url: "/wx/setUserCollection",
+          data: {
+            id: self.data._id
+          }
+        }).then((res) => {
+          if (res.success) {
+            this.isColled = true;
+            wx.showToast({
+              title: '收藏成功'
+            })
+          }
+        }).catch(err => {
+          console.log(err);
+        })
+      }
     },
     clickCopyJobUrlHandler(e) {
       wx.setClipboardData({
@@ -98,7 +136,25 @@ export default {
         }
       })
     },
+    //查询收藏状态
+    getCollectionStatus (id) {
+      const self = this;
+      self.$httpWX.get({
+        url: "/wx/getUserCollectionById",
+        data: {
+          id: id
+        }
+      }).then((res) => {
+        console.log(res);
+        if (res.success) {
+          self.isColled = res.data.isColled
+        }
+      }).catch(err => {
+        console.log(err);
+      })
+    },
     getJobData(id) {
+      const self = this;
       this.$httpWX.get({
         url: '/wx/getJobDetail',
         data: {
@@ -107,18 +163,12 @@ export default {
       }).then(res => {
         if (res.success) {
           this.data = res.result;
-        }
-      })
-    },
-    getUserInfo() {
-      this.$httpWX.get({
-        url: '/wx/getUserInfo'
-      }).then(res => {
-        if (res.success) {
-          console.log('已登录');
+          return res.result['_id'];
         } else {
-          console.log('未登录');
+
         }
+      }).then(jobId => {
+        self.getCollectionStatus(jobId);
       })
     }
   },
@@ -126,8 +176,11 @@ export default {
   mounted () {
     this.data={};
     const query = this.$root.$mp.query;
-    this.getUserInfo()
     this.getJobData(query.id)
+  },
+
+  onLoad () {
+    Object.assign(this.$data, this.$options.data())
   },
 
   created () {

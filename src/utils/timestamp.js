@@ -1,20 +1,19 @@
 function timestamp(timestamp) {
-  var date = new Date(+timestamp);
-  var Y = date.getFullYear() + '-';
-  var M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
-  var D = change(date.getDate()) + ' ';
-  var h = change(date.getHours()) + ':';
-  var m = change(date.getMinutes()) + ':';
-  var s = change(date.getSeconds());
-  console.log(Y + M + D)
-  return Y + M + D;
-}
-function change(t) {
-  if (t < 10) {
-      return "0" + t;
-  } else {
-      return t;
+  const change = function (t) {
+    if (t < 10) {
+        return "0" + t;
+    } else {
+        return t;
+    }
   }
+  let date = new Date(+timestamp);
+  let Y = date.getFullYear() + '-';
+  let M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+  let D = change(date.getDate()) + ' ';
+  let h = change(date.getHours()) + ':';
+  let m = change(date.getMinutes()) + ':';
+  let s = change(date.getSeconds());
+  return (Y + M + D + h + s);
 }
 
 export default timestamp

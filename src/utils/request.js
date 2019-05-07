@@ -1,10 +1,13 @@
 const host = 'http://192.168.123.1:3000/api'
 
 function request (url, method, data, header = {}) {
-  const sessionId = wx.getStorageSync('sessionId');
+  // const sessionId = wx.getStorageSync('sessionId');
   wx.showLoading({
     title: '加载中'
   })
+  let user_token;
+  //获取本地token
+  user_token = wx.getStorageSync('user_token')
   return new Promise((resolve, reject) => {
     wx.request({
       url: host + url,
@@ -12,15 +15,28 @@ function request (url, method, data, header = {}) {
       data: data,
       header: {
         'content-type': 'application/json',
-        'Cookie': sessionId,
+        // 'Cookie': sessionId,
+        'Authorization': user_token ? 'Bearer '+user_token : '',
         ...header
       },
       success: function (res) {
         wx.hideLoading()
-        resolve(res.data)
+        if (res.statusCode == 401) {
+          console.log('未登录');
+          wx.removeStorage({
+            key: 'user_token',
+            success(res) {
+              console.log(res)
+            }
+          })
+        }
+        if (res.statusCode >=200 && res.statusCode < 300 || res.statusCode == 304) {
+          resolve(res.data)
+        }
       },
       fail: function (res) {
         wx.hideLoading()
+        console.log(res)
         // reject(false)
       },
       complete: function () {

@@ -8,10 +8,10 @@
             <span class="salary">{{item.salary}}</span>
           </div>
           <div class="item-header-sm">
-            <span class="area-year-edu">{{item.area}} | {{item.workYear}} | {{item.education}} </span>
+            <span class="area-year-edu">{{item.companyName}} | {{item.area}} | {{item.workYear}} | {{item.education}} </span>
             <span class="date">{{item.formatTime}}</span>
           </div>
-          <div class="item-label">
+          <!-- <div class="item-label">
             <span v-for="(i,idx) in item.industryLables" :key="idx">{{i}}</span>
           </div>
           <div class="item-footer">
@@ -22,34 +22,25 @@
               <p class="company-name">{{item.companyName}}</p>
               <p class="company-label">{{item.financeStage}} | {{item.companySize}} | <span v-for="(i,idx) in item.industryField" :key="idx">{{i}} </span></p>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
-    <!-- <div class="top">
-      <img class="top-icon" src="/static/images/top.png" >
-    </div> -->
   </div>
 </template>
 
 <script>
-import card from '@/components/card'
+import { formatTime } from '@/utils/index'
 
 export default {
+  components: {
+  },
+
   data () {
     return {
-      // motto: 'Hello miniprograme',
-      // userInfo: {
-      //   nickName: 'mpvue',
-      //   avatarUrl: 'http://mpvue.com/assets/logo.png'
-      // },
       pageNo: 1,
       list: []
     }
-  },
-
-  components: {
-    card
   },
 
   methods: {
@@ -70,7 +61,7 @@ export default {
       let pageNo = this.pageNo;
       // let pageSize = this.pageSize;
       this.$httpWX.post({
-        url: '/wx/pageList',
+        url: '/wx/pageCollectionList',
         data: {
           pageNo: pageNo
         }
@@ -85,7 +76,7 @@ export default {
     },
     refreshList() {
       this.$httpWX.post({
-        url: '/wx/pageList',
+        url: '/wx/pageCollectionList',
         data: {
           pageNo: 1
         }
@@ -203,66 +194,5 @@ export default {
       }
     }
   }
-  // .top {
-  //   position: fixed;
-  //   bottom: 40rpx;
-  //   right: 20rpx;
-  //   background: #FFF;
-  //   border-radius: 50rpx;
-  //   .top-icon {
-  //     width: 100rpx;
-  //     height: 100rpx;
-  //   }
-  // }
 }
-/* .userinfo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.userinfo-avatar {
-  width: 128rpx;
-  height: 128rpx;
-  margin: 20rpx;
-  border-radius: 50%;
-}
-
-.userinfo-nickname {
-  color: #aaa;
-}
-
-.usermotto {
-  margin-top: 150px;
-}
-
-.form-control {
-  display: block;
-  padding: 0 12px;
-  margin-bottom: 5px;
-  border: 1px solid #ccc;
-}
-.all{
-  width:7.5rem;
-  height:1rem;
-  background-color:blue;
-}
-.all:after{
-  display:block;
-  content:'';
-  clear:both;
-}
-.left{
-  float:left;
-  width:3rem;
-  height:1rem;
-  background-color:red;
-}
-
-.right{
-  float:left;
-  width:4.5rem;
-  height:1rem;
-  background-color:green;
-} */
 </style>
