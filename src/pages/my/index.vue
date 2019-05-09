@@ -18,7 +18,7 @@
         <img class="btn-icon next" src="/static/images/next.png" >
       </div>
       <div class="about" v-on:click="settingHandler">
-        <img class="btn-icon" src="/static/images/problem.png">
+        <img class="btn-icon" src="/static/images/setting.png">
         <span>设置</span>
         <img class="btn-icon next" src="/static/images/next.png" >
       </div>
@@ -164,7 +164,7 @@ export default {
 
 <style lang='less' scoped >
 .body {
-  background: #e7e7e7;
+  background: #eeeeee;
   .user {
     background: #fff;
     height: 120rpx;
@@ -212,6 +212,7 @@ export default {
         top: 16rpx;
       }
       span {
+        margin-left: 20rpx;
       }
       .next {
         float: right;

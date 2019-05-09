@@ -23,12 +23,14 @@ function request (url, method, data, header = {}) {
         wx.hideLoading()
         if (res.statusCode == 401) {
           console.log('未登录');
+          let url = "../index/main"
+          wx.switchTab({url});
           wx.removeStorage({
             key: 'user_token',
             success(res) {
               console.log(res)
             }
-          })
+          });
         }
         if (res.statusCode >=200 && res.statusCode < 300 || res.statusCode == 304) {
           resolve(res.data)

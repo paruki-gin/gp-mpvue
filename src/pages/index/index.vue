@@ -1,5 +1,7 @@
 <template>
   <div class="body">
+    <!-- <p>{{location}}</p>
+    <search></search> -->
     <div class="main-scroll-container">
       <div class="scroll-view-item" v-for="(item,index) in list" :key="index" v-on:click="clickHandler(item._id)">
         <div class="item-box">
@@ -33,7 +35,7 @@
 </template>
 
 <script>
-import card from '@/components/card'
+import search from '@/components/search'
 
 export default {
   data () {
@@ -44,12 +46,13 @@ export default {
       //   avatarUrl: 'http://mpvue.com/assets/logo.png'
       // },
       pageNo: 1,
-      list: []
+      list: [],
+      location: '杭州市'
     }
   },
 
   components: {
-    card
+    search
   },
 
   methods: {
@@ -61,6 +64,33 @@ export default {
     //     mpvue.navigateTo({ url })
     //   }
     // },
+    getGeo () {
+      let self = this;
+      let ak = 'bngYWdoBrDGyZ3WLVoRbxlWv6o1ZncSU';
+      let url = `http://api.map.baidu.com/geocoder/v2/`
+      wx.getLocation({
+        type: 'wgs84',
+        success: geo => {
+          wx.request({
+            url,
+            data:{
+              ak,
+              output:'json',
+              location:`${geo.latitude},${geo.longitude}`
+            },
+            success:(res)=>{
+              console.log(res)
+              if (res.data.status === 0) {
+                self.location = res.data.result.addressComponent.city
+                console.log(res.data.result.addressComponent.city)
+              } else {
+                self.location = '未知地点'
+              }
+            }
+          })
+        }
+      })
+    },
     clickHandler(id, e) {
       var url = "../detail/main?id=" +id
       wx.navigateTo({url})
@@ -111,7 +141,8 @@ export default {
   },
 
   mounted () {
-    this.refreshList()
+    this.refreshList();
+    // this.getGeo();
   },
 
   created () {

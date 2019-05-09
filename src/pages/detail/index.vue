@@ -44,8 +44,22 @@
     </div>
     <div class="footer">
       <div class="colle">
-        <span v-if="isColled" v-on:click="colleHandler">取消收藏</span>
-        <span v-else v-on:click="colleHandler">收藏</span>
+        <div class="colle-label colle-active" v-if="isColled" v-on:click="colleHandler">
+          <img src="/static/images/colle_fill.png" >
+          <span>取消收藏</span>
+        </div>
+        <div class="colle-label" v-else v-on:click="colleHandler">
+          <img src="/static/images/colle.png" >
+          <span>收藏</span>
+        </div>
+      </div>
+      <div class="share">
+        <div class="share-label" v-on:click="shareHandler">
+          <button open-type='share'>
+            <img src="/static/images/share.png" >
+            <span>分享</span>
+          </button>
+        </div>
       </div>
       <div class="goto">
         <span v-on:click="clickCopyJobUrlHandler">复制链接</span>
@@ -136,6 +150,9 @@ export default {
         }
       })
     },
+    shareHandler() {
+
+    },
     //查询收藏状态
     getCollectionStatus (id) {
       const self = this;
@@ -173,6 +190,10 @@ export default {
     }
   },
 
+  onShareAppMessage: function(options) {
+    console.log(options)
+  },
+
   mounted () {
     this.data={};
     const query = this.$root.$mp.query;
@@ -192,6 +213,7 @@ export default {
 <style lang='less' scoped>
 .body {
   padding: 10rpx 20rpx 100rpx 20rpx;
+  background: #fff;
   .summary {
     padding: 10rpx;
     padding: 10rpx 20rpx;
@@ -306,28 +328,68 @@ export default {
     height: 80rpx;
     width: 100%;
     background: #FFF;
-    padding: 10rpx 20rpx 0 20rpx;
+    padding: 16rpx 20rpx 0 20rpx;
+    box-shadow: -2rpx 0 5rpx #888888;
     &>div {
       display: inline-block;
       // position: absolute;
       // top: 50%;
       // transform: translateY(-50%);
       height: 60rpx;
-      border: 1px #14c4bb solid;
-      border-radius: 4rpx;
       font-size: 16px;
       font-weight: 500;
       line-height: 60rpx;
       text-align: center;
     }
     .colle {
-      width: 30%;
-      margin-right: 22rpx;
-      background: #eafffe;
-      color: #14c4bb;
+      width: 20%;
+      margin-right: 14rpx;
+      // background: #eafffe;
+      color: #999999;
+      .colle-label {
+        img {
+          width: 40rpx;
+          height: 40rpx;
+          position: relative;
+          top:8rpx;
+        }
+      }
+      .colle-active {
+        color: #14c4bb;
+      }
+    }
+    .share {
+      width: 20%;
+      margin-right: 14rpx;
+      color: #999999;
+      .share-label {
+        button {
+          position: relative;
+          top: 8rpx;
+          display: inline-block;
+          margin: 0;
+          padding: 0;
+          background: #fff;
+          border-radius:0;
+          overflow: none;
+          color: #999999;
+          line-height: 40rpx;
+        }
+        button::after {
+          border: none;
+        }
+        img {
+          width: 40rpx;
+          height: 40rpx;
+          position: relative;
+          top: 10rpx;
+        }
+      }
     }
     .goto {
-      width: 60%;
+      width: 50%;
+      border: 1px #14c4bb solid;
+      border-radius: 4rpx;
       background: #14c4bb;
       color: #fff;
     }

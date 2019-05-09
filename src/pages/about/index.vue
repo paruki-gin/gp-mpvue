@@ -1,6 +1,11 @@
 <template>
   <div class="body">
-    <p>这是关于</p>
+    <div class="content">
+      <p>&emsp;&emsp;GP招聘是提供招聘信息的信息展示平台，为用户提供大量岗位数据，供用户进行收藏、分享等。</p>
+      <p>&emsp;&emsp;关于平台数据的公告：本平台保证所有数据来源于互联网招聘网站数据，并保证所有数据引用自相关网站，没有进行任何客观或者主管意图的修改。</p>
+      <p>&emsp;&emsp;由于招聘数据造成的损失，本平台恕不负责。</p>
+      <p class="email">作者邮箱: <span>xxxx@qq.com</span></p>
+    </div>
   </div>
 </template>
 
@@ -28,71 +33,21 @@ export default {
   }
 }
 </script>
-
 <style lang='less' scoped >
 .body {
-  background: #e7e7e7;
-  .user {
-    background: #fff;
-    height: 120rpx;
+  background: #ffffff;
+  height: 100vh;
+  .content {
     padding: 20rpx;
-    .icon {
-      display: inline-block;
-      img {
-        width: 100rpx;
-        height: 100rpx;
-        // border: 1px #666666 solid;
-        border-radius: 50rpx;
-        background: #3b3b3b;
-      }
-    }
-    .info {
-      display: inline-block;
-      margin-left: 20rpx;
-      position: relative;
-      bottom: 24rpx;
-      .login-btn {
-        font-size: 16px;
-        font-size: 700
-      }
-      .tip {
-        font-size: 10px;
-        color: #666666;
-      }
-    }
-  }
-  .door {
-    margin-top: 10rpx;
-    &>div {
-      padding: 10rpx 20rpx;
-      height: 80rpx;
-      background: #fff;
-      font-size: 14px;
-      font-weight: 600;
-      border-bottom: 1px #e7e7e7 solid;
-      line-height: 80rpx;
-      color: #3b3b3b;
-      .btn-icon {
-        width: 50rpx;
-        height: 50rpx;
-        position: relative;
-        top: 16rpx;
-      }
+    font-size: 16px;
+    .email {
+      margin-top: 40rpx;
+      color: #999999;
+      font-size: 12px;
       span {
-      }
-      .next {
-        float: right;
+        color: #14c4bb;
       }
     }
   }
 }
-// .log-list {
-//   display: flex;
-//   flex-direction: column;
-//   padding: 40rpx;
-// }
-
-// .log-item {
-//   margin: 10rpx;
-// }
 </style>

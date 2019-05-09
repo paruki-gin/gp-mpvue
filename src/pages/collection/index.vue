@@ -8,10 +8,10 @@
             <span class="salary">{{item.salary}}</span>
           </div>
           <div class="item-header-sm">
-            <span class="area-year-edu">{{item.companyName}} | {{item.area}} | {{item.workYear}} | {{item.education}} </span>
+            <span class="area-year-edu">{{item.area}} | {{item.workYear}} | {{item.education}} </span>
             <span class="date">{{item.formatTime}}</span>
           </div>
-          <!-- <div class="item-label">
+          <div class="item-label">
             <span v-for="(i,idx) in item.industryLables" :key="idx">{{i}}</span>
           </div>
           <div class="item-footer">
@@ -22,7 +22,7 @@
               <p class="company-name">{{item.companyName}}</p>
               <p class="company-label">{{item.financeStage}} | {{item.companySize}} | <span v-for="(i,idx) in item.industryField" :key="idx">{{i}} </span></p>
             </div>
-          </div> -->
+          </div>
         </div>
       </div>
     </div>

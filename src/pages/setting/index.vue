@@ -1,7 +1,7 @@
 <template>
   <div class="body">
     <div class="door">
-      <div class="collection" v-on:click="collectionHandler">
+      <div class="collection" v-on:click="logoutHandler">
         <span>退出登录</span>
         <img class="btn-icon next" src="/static/images/next.png" >
       </div>
@@ -22,6 +22,16 @@ export default {
   },
 
   methods: {
+    logoutHandler() {
+      const self = this;
+      wx.removeStorageSync('user_token');
+      this.$httpWX.get({
+        url: "/wx/logout"
+      }).then((res) => {
+      }).catch(err => {
+        console.log(err);
+      })
+    }
   },
 
   mounted () {
@@ -35,7 +45,7 @@ export default {
 
 <style lang='less' scoped >
 .body {
-  background: #e7e7e7;
+  background: #eeeeee;
   .user {
     background: #fff;
     height: 120rpx;
