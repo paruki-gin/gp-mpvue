@@ -1,31 +1,41 @@
 <template>
   <div class="body">
-    <!-- <p>{{location}}</p>
-    <search></search> -->
+    <!-- <div class="location">
+      <p>{{location}}</p>
+    </div> -->
+    <!-- <div id="backToTop" v-show="showBackTop" @click="backToTop">
+      返回<br>顶部
+    </div> -->
+    <search v-on:queryChange="queryChange"></search>
     <div class="main-scroll-container">
-      <div class="scroll-view-item" v-for="(item,index) in list" :key="index" v-on:click="clickHandler(item._id)">
-        <div class="item-box">
-          <div class="item-header">
-            <span class="name">{{item.name}}</span>
-            <span class="salary">{{item.salary}}</span>
-          </div>
-          <div class="item-header-sm">
-            <span class="area-year-edu">{{item.area}} | {{item.workYear}} | {{item.education}} </span>
-            <span class="date">{{item.formatTime}}</span>
-          </div>
-          <div class="item-label">
-            <span v-for="(i,idx) in item.industryLables" :key="idx">{{i}}</span>
-          </div>
-          <div class="item-footer">
-            <div class="company-img-box">
-              <img :src="item.companyLogo">
+      <div v-if="list.length">
+        <div class="scroll-view-item" v-for="(item,index) in list" :key="index" v-on:click="clickHandler(item._id)">
+          <div class="item-box">
+            <div class="item-header">
+              <span class="name">{{item.name}}</span>
+              <span class="salary">{{item.salary}}</span>
             </div>
-            <div class="company-info">
-              <p class="company-name">{{item.companyName}}</p>
-              <p class="company-label">{{item.financeStage}} | {{item.companySize}} | <span v-for="(i,idx) in item.industryField" :key="idx">{{i}} </span></p>
+            <div class="item-header-sm">
+              <span class="area-year-edu">{{item.area}} | {{item.workYear}} | {{item.education}} </span>
+              <span class="date">{{item.formatTime}}</span>
+            </div>
+            <div class="item-label">
+              <span v-for="(i,idx) in item.industryLables" :key="idx">{{i}}</span>
+            </div>
+            <div class="item-footer">
+              <div class="company-img-box">
+                <img :src="item.companyLogo">
+              </div>
+              <div class="company-info">
+                <p class="company-name">{{item.companyName}}</p>
+                <p class="company-label">{{item.financeStage}} | {{item.companySize}} | <span v-for="(i,idx) in item.industryField" :key="idx">{{i}} </span></p>
+              </div>
             </div>
           </div>
         </div>
+      </div>
+      <div v-else>
+        <div class="no-data-tip">没找到您要的职位哦，看看别的吧</div>
       </div>
     </div>
     <!-- <div class="top">
@@ -36,6 +46,7 @@
 
 <script>
 import search from '@/components/search'
+import {salaryArr, workYearArr, companySizeArr, financeStageArr} from '@/config/query';
 
 export default {
   data () {
@@ -47,12 +58,26 @@ export default {
       // },
       pageNo: 1,
       list: [],
-      location: '杭州市'
+      showBackTop: false,
+      currRegion: '杭州市',
+      currInput: '',
+      currSalary: '-1',
+      currWorkYear: '-1',
+      currCompanySize: '-1',
+      currFinanceStage: '-1'
     }
   },
 
   components: {
     search
+  },
+
+  onPageScroll: function(e){
+    if (e.scrollTop > 1800){
+      this.showBackTop = true;
+    } else {
+      this.showBackTop = false;
+    }
   },
 
   methods: {
@@ -64,32 +89,27 @@ export default {
     //     mpvue.navigateTo({ url })
     //   }
     // },
-    getGeo () {
-      let self = this;
-      let ak = 'bngYWdoBrDGyZ3WLVoRbxlWv6o1ZncSU';
-      let url = `http://api.map.baidu.com/geocoder/v2/`
-      wx.getLocation({
-        type: 'wgs84',
-        success: geo => {
-          wx.request({
-            url,
-            data:{
-              ak,
-              output:'json',
-              location:`${geo.latitude},${geo.longitude}`
-            },
-            success:(res)=>{
-              console.log(res)
-              if (res.data.status === 0) {
-                self.location = res.data.result.addressComponent.city
-                console.log(res.data.result.addressComponent.city)
-              } else {
-                self.location = '未知地点'
-              }
-            }
-          })
-        }
+    backToTop (e) {
+      wx.pageScrollTo({
+        scrollTop: 0,
+        duration: 300
       })
+    },
+    queryChange (region, inputVal, salary, workYear, companySize, financeStage) {
+      let regionStr = '';
+      if (region[2] && region[2] !== '全部') {
+        regionStr = region[2];
+      } else if (region[1] && region[1] !== '全部') {
+        regionStr = region[1];
+      }
+      this.currRegion = regionStr;
+      this.currInput = inputVal;
+      this.currSalary = salary.value;
+      this.currWorkYear = workYear.value;
+      this.currCompanySize = companySize.value;
+      this.currFinanceStage = financeStage.value;
+      // console.log(currRegion, inputVal, salary.value, workYear.value, companySize.value, financeStage.value);
+      this.refreshList();
     },
     clickHandler(id, e) {
       var url = "../detail/main?id=" +id
@@ -102,12 +122,38 @@ export default {
       this.$httpWX.post({
         url: '/wx/pageList',
         data: {
-          pageNo: pageNo
+          pageNo,
+          currRegion: this.currRegion,
+          currInput: this.currInput,
+          currSalary: this.currSalary,
+          currWorkYear: this.currWorkYear,
+          currCompanySize: this.currCompanySize,
+          currFinanceStage: this.currFinanceStage
         }
       }).then(res => {
         if (res.success) {
           res.result.data.forEach((curr, index, arr) => {
             curr.formatTime = this.$timestamp(curr.formatTime)
+            salaryArr.forEach((item) => {
+              if (item.value === curr.salary) {
+                curr.salary = item.label
+              }
+            })
+            workYearArr.forEach((item) => {
+              if (item.value === curr.workYear) {
+                curr.workYear = item.label
+              }
+            })
+            companySizeArr.forEach((item) => {
+              if (item.value === curr.companySize) {
+                curr.companySize = item.label
+              }
+            })
+            financeStageArr.forEach((item) => {
+              if (item.value === curr.financeStage) {
+                curr.financeStage = item.label
+              }
+            })
           })
           this.list = [...this.list, ...res.result.data]
         }
@@ -117,12 +163,41 @@ export default {
       this.$httpWX.post({
         url: '/wx/pageList',
         data: {
-          pageNo: 1
+          pageNo: 1,
+          currRegion: this.currRegion,
+          currInput: this.currInput,
+          currSalary: this.currSalary,
+          currWorkYear: this.currWorkYear,
+          currCompanySize: this.currCompanySize,
+          currFinanceStage: this.currFinanceStage
         }
       }).then(res => {
         if (res.success) {
+          if (res.result.total === 0) {
+            console.log('无数据')
+          }
           res.result.data.forEach((curr, index, arr) => {
             curr.formatTime = this.$timestamp(curr.formatTime)
+            salaryArr.forEach((item) => {
+              if (item.value === curr.salary) {
+                curr.salary = item.label
+              }
+            })
+            workYearArr.forEach((item) => {
+              if (item.value === curr.workYear) {
+                curr.workYear = item.label
+              }
+            })
+            companySizeArr.forEach((item) => {
+              if (item.value === curr.companySize) {
+                curr.companySize = item.label
+              }
+            })
+            financeStageArr.forEach((item) => {
+              if (item.value === curr.financeStage) {
+                curr.financeStage = item.label
+              }
+            })
           })
           this.list = res.result.data
         }
@@ -142,7 +217,6 @@ export default {
 
   mounted () {
     this.refreshList();
-    // this.getGeo();
   },
 
   created () {
@@ -158,7 +232,22 @@ export default {
 <style lang='less' scoped>
 .body {
   // font-family: 'Microsoft YaHei';
+  #backToTop{
+    width: 60rpx;
+    height: 60rpx;
+    background-color: #14c4bb;
+    color: white;
+    padding: 10rpx 0 18rpx 10rpx;
+    right: 0;
+    position: fixed; //固定按钮在屏幕上的位置
+    bottom: 2.5%;
+    text-align: center;
+    z-index: 100;
+    font-size: 12px;
+    border-radius: 12px 0 0 12px;
+  }
   .main-scroll-container {
+    margin-top: 140rpx;
     .scroll-view-item {
       background: #e0e0e0;
       padding: 2rpx 0;
@@ -233,6 +322,15 @@ export default {
         }
       }
     }
+    .no-data-tip {
+      position: absolute;
+      width: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      text-align: center;
+      color: #999;
+      font-size: 16px;
+    }
   }
   // .top {
   //   position: fixed;
@@ -246,6 +344,7 @@ export default {
   //   }
   // }
 }
+
 /* .userinfo {
   display: flex;
   flex-direction: column;
