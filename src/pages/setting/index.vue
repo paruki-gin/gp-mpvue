@@ -1,6 +1,10 @@
 <template>
   <div class="body">
     <div class="door">
+      <div class="" v-on:click="clearDataHandler">
+        <span>清除数据</span>
+        <img class="btn-icon next" src="/static/images/next.png" >
+      </div>
       <div class="collection" v-on:click="logoutHandler">
         <span>退出登录</span>
         <img class="btn-icon next" src="/static/images/next.png" >
@@ -22,6 +26,16 @@ export default {
   },
 
   methods: {
+    clearDataHandler() {
+      setTimeout(function() {
+        wx.showToast({
+          title: '已清除数据',
+          icon: 'none',
+          duration: 1500,
+          mask:true
+        })
+      }, 500);
+    },
     logoutHandler() {
       const self = this;
       wx.removeStorageSync('user_token');

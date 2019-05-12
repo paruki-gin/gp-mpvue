@@ -31,6 +31,7 @@
 
 <script>
 import { formatTime } from '@/utils/index'
+import {salaryArr, workYearArr, companySizeArr, financeStageArr} from '@/config/query';
 
 export default {
   components: {
@@ -67,9 +68,40 @@ export default {
         }
       }).then(res => {
         if (res.success) {
-          res.result.data.forEach((curr, index, arr) => {
-            curr.formatTime = this.$timestamp(curr.formatTime)
-          })
+          if (!res.result.data.length) {
+            wx.showToast({
+              title: '没有更多',
+              icon: 'none',
+              duration: 500,
+              mask:true
+            })
+            self.pageNo -=1
+          } else {
+            res.result.data.forEach((curr, index, arr) => {
+              curr.formatTime = this.$timestamp(curr.formatTime)
+              salaryArr.forEach((item) => {
+                if (item.value === curr.salary) {
+                  curr.salary = item.label
+                }
+              })
+              workYearArr.forEach((item) => {
+                if (item.value === curr.workYear) {
+                  curr.workYear = item.label
+                }
+              })
+              companySizeArr.forEach((item) => {
+                if (item.value === curr.companySize) {
+                  curr.companySize = item.label
+                }
+              })
+              financeStageArr.forEach((item) => {
+                if (item.value === curr.financeStage) {
+                  curr.financeStage = item.label
+                }
+              })
+            })
+          }
+
           this.list = [...this.list, ...res.result.data]
         }
       })
@@ -84,6 +116,26 @@ export default {
         if (res.success) {
           res.result.data.forEach((curr, index, arr) => {
             curr.formatTime = this.$timestamp(curr.formatTime)
+            salaryArr.forEach((item) => {
+              if (item.value === curr.salary) {
+                curr.salary = item.label
+              }
+            })
+            workYearArr.forEach((item) => {
+              if (item.value === curr.workYear) {
+                curr.workYear = item.label
+              }
+            })
+            companySizeArr.forEach((item) => {
+              if (item.value === curr.companySize) {
+                curr.companySize = item.label
+              }
+            })
+            financeStageArr.forEach((item) => {
+              if (item.value === curr.financeStage) {
+                curr.financeStage = item.label
+              }
+            })
           })
           this.list = res.result.data
         }

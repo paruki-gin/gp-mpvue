@@ -12,7 +12,8 @@
           <img src="../../static/images/coordinates.png" alt="">
           <span v-if="region[2] && region[2] !== '全部'">{{region[2]}}</span>
           <span v-else-if="region[1] && region[1] !== '全部'">{{region[1]}}</span>
-          <span v-else>{{region[0]}}</span>
+          <span v-else-if="region[1] && region[1] !== '全部'">{{region[0]}}</span>
+          <span v-else>全部</span>
         </div>
       </picker>
     </div>
@@ -135,7 +136,7 @@ export default {
       },
       isFinanceStagPickerOpen: false,
       customItem: '全部',
-      region: ['浙江省', '杭州市', '全部'],
+      region: ['', '', ''],
       salaryArr: salaryArr,
       workYearArr: workYearArr,
       companySizeArr: companySizeArr,
@@ -167,12 +168,12 @@ export default {
               location:`${geo.latitude},${geo.longitude}`
             },
             success:(res)=>{
-              console.log(res)
               if (res.data.status === 0) {
-                self.region[1] = res.data.result.addressComponent.city
-                console.log(res.data.result.addressComponent.city)
+                self.region.splice(0, 1, res.data.result.addressComponent.province)
+                self.region.splice(1, 1, res.data.result.addressComponent.city)
+                self.region.splice(2, 1, res.data.result.addressComponent.district)
               } else {
-                self.region[1] = ''
+                this.region = ['','','']
               }
             }
           })
@@ -182,7 +183,16 @@ export default {
 
     bindRegionChange(e) {
       console.log(e.mp.detail.value)
-      this.region = e.mp.detail.value
+      if (e.mp.detail.value[1] === '全部') {
+        wx.showToast({
+          title: '请选择城市或地区',
+          icon: 'none',
+          duration: 500,
+          mask:true
+        })
+      } else {
+        this.region = e.mp.detail.value
+      }
     },
 
     bindClearQuery(e) {
@@ -273,7 +283,7 @@ export default {
   },
 
   mounted () {
-    // this.getGeo();
+    this.getGeo();
     this.$watch('region', debounce((val) => {
       val && this.queryChange();
     }, 200))
@@ -298,9 +308,9 @@ export default {
 
 <style lang='less' scoped >
 .index-tar-container {
-  position: fixed;
+  position: relative;
   width: 100vw;
-  top: 0;
+  // top: 0;
   z-index: 99;
   border-bottom: 2rpx solid #d7d6dc;
   .location {

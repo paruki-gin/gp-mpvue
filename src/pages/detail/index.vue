@@ -46,7 +46,7 @@
       <div class="colle">
         <div class="colle-label colle-active" v-if="isColled" v-on:click="colleHandler">
           <img src="/static/images/colle_fill.png" >
-          <span>取消收藏</span>
+          <span>取消</span>
         </div>
         <div class="colle-label" v-else v-on:click="colleHandler">
           <img src="/static/images/colle.png" >
@@ -55,10 +55,16 @@
       </div>
       <div class="share">
         <div class="share-label" v-on:click="shareHandler">
-          <button open-type='share'>
+          <div v-if="isLogined">
+            <button open-type='share'>
+              <img src="/static/images/share.png" >
+              <span>分享</span>
+            </button>
+          </div>
+          <div v-else>
             <img src="/static/images/share.png" >
             <span>分享</span>
-          </button>
+          </div>
         </div>
       </div>
       <div class="goto">
@@ -71,12 +77,14 @@
 </template>
 
 <script>
+import {salaryArr, workYearArr, companySizeArr, financeStageArr} from '@/config/query';
 export default {
   data () {
     return {
       data: {
       },
-      isColled: false
+      isColled: false,
+      isLogined: false
     }
   },
 
@@ -86,40 +94,49 @@ export default {
   methods: {
     colleHandler() {
       const self = this;
-      if (this.isColled) {
-        //取消收藏
-        self.$httpWX.get({
-          url: "/wx/delUserCollection",
-          data: {
-            id: self.data._id
-          }
-        }).then((res) => {
-          if (res.success) {
-            this.isColled = false;
-            wx.showToast({
-              title: '取消收藏成功'
-            })
-          }
-        }).catch(err => {
-          console.log(err);
+      if (!this.isLogined) {
+        wx.showToast({
+          title: '请先登录',
+          icon: 'none',
+          duration: 500,
+          mask:true
         })
       } else {
-        //收藏
-        self.$httpWX.get({
-          url: "/wx/setUserCollection",
-          data: {
-            id: self.data._id
-          }
-        }).then((res) => {
-          if (res.success) {
-            this.isColled = true;
-            wx.showToast({
-              title: '收藏成功'
-            })
-          }
-        }).catch(err => {
-          console.log(err);
-        })
+        if (this.isColled) {
+          //取消收藏
+          self.$httpWX.get({
+            url: "/wx/delUserCollection",
+            data: {
+              id: self.data._id
+            }
+          }).then((res) => {
+            if (res.success) {
+              this.isColled = false;
+              wx.showToast({
+                title: '取消收藏成功'
+              })
+            }
+          }).catch(err => {
+            console.log(err);
+          })
+        } else {
+          //收藏
+          self.$httpWX.get({
+            url: "/wx/setUserCollection",
+            data: {
+              id: self.data._id
+            }
+          }).then((res) => {
+            if (res.success) {
+              this.isColled = true;
+              wx.showToast({
+                title: '收藏成功'
+              })
+            }
+          }).catch(err => {
+            console.log(err);
+          })
+        }
       }
     },
     clickCopyJobUrlHandler(e) {
@@ -151,7 +168,14 @@ export default {
       })
     },
     shareHandler() {
-
+      if (!this.isLogined) {
+        wx.showToast({
+          title: '请先登录',
+          icon: 'none',
+          duration: 500,
+          mask:true
+        })
+      }
     },
     //查询收藏状态
     getCollectionStatus (id) {
@@ -162,9 +186,11 @@ export default {
           id: id
         }
       }).then((res) => {
-        console.log(res);
         if (res.success) {
           self.isColled = res.data.isColled
+          self.isLogined = true;
+        } else {
+          self.isLogined = false;
         }
       }).catch(err => {
         console.log(err);
@@ -179,7 +205,28 @@ export default {
         }
       }).then(res => {
         if (res.success) {
-          this.data = res.result;
+          let detail = res.result;
+          salaryArr.forEach((item) => {
+            if (item.value === detail.salary) {
+              detail.salary = item.label
+            }
+          })
+          workYearArr.forEach((item) => {
+            if (item.value === detail.workYear) {
+              detail.workYear = item.label
+            }
+          })
+          companySizeArr.forEach((item) => {
+            if (item.value === detail.companySize) {
+              detail.companySize = item.label
+            }
+          })
+          financeStageArr.forEach((item) => {
+            if (item.value === detail.financeStage) {
+              detail.financeStage = item.label
+            }
+          })
+          this.data = detail;
           return res.result['_id'];
         } else {
 

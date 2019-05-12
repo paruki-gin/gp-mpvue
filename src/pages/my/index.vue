@@ -5,9 +5,15 @@
         <img :src="userInfo.avatarUrl">
       </div>
       <div class="info">
-        <p class="login-btn" v-if="userInfo.nickName">{{userInfo.nickName}}</p>
-        <p class="login-btn" @click="bindLogin" v-else>点击登录</p>
-        <p class="tip">{{userInfo.nickName ? '&nbsp;' : '登录发现更多'}}</p>
+        <p class="username" v-if="userInfo.nickName">{{userInfo.nickName}}</p>
+        <!-- <p class="login-btn" v-else @click="bindLogin"></p> -->
+        <div v-else>
+          <button class="login-btn"  open-type="getUserInfo" @getuserinfo="bindGetUserInfo">
+            <img class='btnImg' src='../../../static/images/wx.png'></img>
+            <span>登录</span>
+          </button>
+          <p class="tip">登录发现更多</p>
+        </div>
       </div>
       <!-- <button open-type="getUserInfo" @getuserinfo="bindGetUserInfo" @click="getUserInfoClick">获取权限</button> -->
     </div>
@@ -49,7 +55,7 @@ export default {
   },
 
   methods: {
-    bindLogin (code) {
+    /* bindLogin (code) {
       const self = this;
       wx.getUserInfo({
         withCredentials: true,
@@ -85,7 +91,7 @@ export default {
           self.buttonVisible = true;
         }
       })
-    },
+    }, */
     getCurrentUserInfo () {
       const self = this;
       self.$httpWX.get({
@@ -94,45 +100,77 @@ export default {
           code: self.code
         }
       }).then((res) => {
-        console.log(res);
         if (res.success) {
           self.userInfo = res.data;
+        } else {
+          self.userInfo.avatarUrl = '/static/images/user.png';
+          self.userInfo.nickName = '';
         }
       }).catch(err => {
         console.log(err);
       })
     },
-    // bindGetUserInfo(e) {
-    //   // console.log('回调事件后触发')
-    //   const self = this;
-    //   if (e.mp.detail.userInfo){
-    //     console.log('允许')
-    //     let { encryptedData,userInfo,iv } = e.mp.detail;
-    //     self.$httpWX.post({
-    //       url: "/wx/login",
-    //       data: {
-    //         code: self.code,
-    //         encryptedData,
-    //         iv
-    //       }
-    //     }).then(res => {
-    //         console.log(res);
-    //     }).catch(err => {
-    //         console.log(err);
-    //     })
-    //   } else {
-    //     console.log('拒绝');
-    //   }
-    // },
+    bindGetUserInfo(e) {
+      // console.log('回调事件后触发')
+      const self = this;
+      if (e.mp.detail.userInfo){
+        console.log('允许')
+        let { encryptedData,userInfo,iv } = e.mp.detail;
+        self.$httpWX.post({
+          url: "/wx/login",
+          data: {
+            code: self.code,
+            encryptedData,
+            iv
+          }
+        }).then((res, header) => {
+          if (res.success) {
+            self.userInfo = res.data;
+            wx.setStorageSync('user_token', res.data.token);
+            wx.showToast({
+              title: '登录成功',
+              icon: 'success',
+              duration: 2000
+            })
+          } else {
+            wx.showToast({
+              title: '登录失败'
+            })
+          }
+        }).catch(err => {
+          console.log(err);
+        })
+      } else {
+        console.log('拒绝');
+      }
+    },
     settingHandler() {
-      wx.navigateTo({
-        url: "../setting/main"
-      })
+      if (this.userInfo.nickName) {
+        wx.navigateTo({
+          url: "../setting/main"
+        })
+      } else {
+        wx.showToast({
+          title: '请先登录',
+          icon: 'none',
+          duration: 500,
+          mask:true
+        })
+      }
     },
     collectionHandler() {
-      wx.navigateTo({
-        url: "../collection/main"
-      })
+      if (this.userInfo.nickName) {
+        wx.navigateTo({
+          url: "../collection/main"
+        })
+      } else {
+        wx.showToast({
+          title: '请先登录',
+          icon: 'none',
+          duration: 500,
+          mask:true
+        })
+      }
     },
     aboutHandler() {
       wx.navigateTo({
@@ -143,21 +181,30 @@ export default {
 
   mounted () {
     const self = this;
+  },
+
+  created () {
+  },
+
+  onShow() {
+    const self = this;
+    // self.userInfo.avatarUrl = '/static/images/user.png';
+    // self.userInfo.nickName = '';
     wx.login({
       success (res) {
         if (res.code){
           self.code = res.code;
         } else {
           wx.showToast({
-            title: '未知错误'
+            title: '未知错误',
+            icon: 'none',
+            duration: 500,
+            mask:true
           })
         }
         self.getCurrentUserInfo();
       }
     })
-  },
-
-  created () {
   }
 }
 </script>
@@ -183,14 +230,35 @@ export default {
       display: inline-block;
       margin-left: 20rpx;
       position: relative;
-      bottom: 24rpx;
+      bottom: 12rpx;
+      .username {
+        position:relative;
+        bottom:24rpx;
+      }
       .login-btn {
-        font-size: 16px;
-        font-size: 700
+        width: 180rpx;
+        height: 60rpx;
+        background-color: #14c4bb;
+        color: white;
+        border-radius: 40rpx;
+        .btnImg {
+          // margin-right: 8rpx;
+          width: 40rpx;
+          height: 40rpx;
+        }
+        .login-btn::after {
+          border-radius: 40rpx;
+          border: 0;
+        }
+        span {
+          position: relative;
+          bottom: 10rpx;
+        }
       }
       .tip {
         font-size: 10px;
         color: #666666;
+        text-align: center;
       }
     }
   }

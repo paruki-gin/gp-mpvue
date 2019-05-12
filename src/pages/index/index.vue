@@ -59,7 +59,7 @@ export default {
       pageNo: 1,
       list: [],
       showBackTop: false,
-      currRegion: '杭州市',
+      currRegion: '',
       currInput: '',
       currSalary: '-1',
       currWorkYear: '-1',
@@ -116,6 +116,7 @@ export default {
       wx.navigateTo({url})
     },
     getList() {
+      const self = this;
       this.pageNo += 1;
       let pageNo = this.pageNo;
       // let pageSize = this.pageSize;
@@ -132,29 +133,39 @@ export default {
         }
       }).then(res => {
         if (res.success) {
-          res.result.data.forEach((curr, index, arr) => {
-            curr.formatTime = this.$timestamp(curr.formatTime)
-            salaryArr.forEach((item) => {
-              if (item.value === curr.salary) {
-                curr.salary = item.label
-              }
+          if (!res.result.data.length) {
+            wx.showToast({
+              title: '没有更多',
+              icon: 'none',
+              duration: 500,
+              mask:true
             })
-            workYearArr.forEach((item) => {
-              if (item.value === curr.workYear) {
-                curr.workYear = item.label
-              }
+            self.pageNo -=1
+          } else {
+            res.result.data.forEach((curr, index, arr) => {
+              curr.formatTime = this.$timestamp(curr.formatTime)
+              salaryArr.forEach((item) => {
+                if (item.value === curr.salary) {
+                  curr.salary = item.label
+                }
+              })
+              workYearArr.forEach((item) => {
+                if (item.value === curr.workYear) {
+                  curr.workYear = item.label
+                }
+              })
+              companySizeArr.forEach((item) => {
+                if (item.value === curr.companySize) {
+                  curr.companySize = item.label
+                }
+              })
+              financeStageArr.forEach((item) => {
+                if (item.value === curr.financeStage) {
+                  curr.financeStage = item.label
+                }
+              })
             })
-            companySizeArr.forEach((item) => {
-              if (item.value === curr.companySize) {
-                curr.companySize = item.label
-              }
-            })
-            financeStageArr.forEach((item) => {
-              if (item.value === curr.financeStage) {
-                curr.financeStage = item.label
-              }
-            })
-          })
+          }
           this.list = [...this.list, ...res.result.data]
         }
       })
@@ -247,7 +258,7 @@ export default {
     border-radius: 12px 0 0 12px;
   }
   .main-scroll-container {
-    margin-top: 140rpx;
+    // margin-top: 140rpx;
     .scroll-view-item {
       background: #e0e0e0;
       padding: 2rpx 0;
