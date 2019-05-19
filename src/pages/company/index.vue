@@ -1,12 +1,16 @@
 <template>
   <div class="body">
-    <!-- <div class="location">
-      <p>{{location}}</p>
-    </div> -->
-    <!-- <div id="backToTop" v-show="showBackTop" @click="backToTop">
-      返回<br>顶部
-    </div> -->
-    <search v-on:queryChange="queryChange"></search>
+    <div class="page-header">
+      <div v-if="list.length">
+        <div class="company-img-box">
+          <img :src="list[0].companyLogo">
+        </div>
+        <div class="company-info">
+          <p class="company-name">{{list[0].companyName}}</p>
+          <p class="company-label">{{list[0].financeStage}} | {{list[0].companySize}} | <span v-for="(i,idx) in list[0].industryField" :key="idx">{{i}} </span></p>
+        </div>
+      </div>
+    </div>
     <div class="main-scroll-container">
       <div v-if="list.length">
         <div class="scroll-view-item" v-for="(item,index) in list" :key="index" v-on:click="clickHandler(item._id)">
@@ -22,7 +26,7 @@
             <div class="item-label">
               <span v-for="(i,idx) in item.industryLables" :key="idx">{{i}}</span>
             </div>
-            <div class="item-footer">
+            <!-- <div class="item-footer">
               <div class="company-img-box">
                 <img :src="item.companyLogo">
               </div>
@@ -30,53 +34,30 @@
                 <p class="company-name">{{item.companyName}}</p>
                 <p class="company-label">{{item.financeStage}} | {{item.companySize}} | <span v-for="(i,idx) in item.industryField" :key="idx">{{i}} </span></p>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
       <div v-else>
-        <div class="no-data-tip">没找到您要的职位哦，看看别的吧</div>
+        <div class="no-data-tip">暂无数据</div>
       </div>
     </div>
-    <!-- <div class="top">
-      <img class="top-icon" src="/static/images/top.png" >
-    </div> -->
   </div>
 </template>
 
 <script>
-import search from '@/components/search'
+import { formatTime } from '@/utils/index'
 import {salaryArr, workYearArr, companySizeArr, financeStageArr} from '@/config/query';
 
 export default {
+  components: {
+  },
+
   data () {
     return {
-      // motto: 'Hello miniprograme',
-      // userInfo: {
-      //   nickName: 'mpvue',
-      //   avatarUrl: 'http://mpvue.com/assets/logo.png'
-      // },
       pageNo: 1,
       list: [],
-      showBackTop: false,
-      currRegion: '杭州市',
-      currInput: '',
-      currSalary: '-1',
-      currWorkYear: '-1',
-      currCompanySize: '-1',
-      currFinanceStage: '-1'
-    }
-  },
-
-  components: {
-    search
-  },
-
-  onPageScroll: function(e){
-    if (e.scrollTop > 1800){
-      this.showBackTop = true;
-    } else {
-      this.showBackTop = false;
+      companyId: ''
     }
   },
 
@@ -89,47 +70,20 @@ export default {
     //     mpvue.navigateTo({ url })
     //   }
     // },
-    backToTop (e) {
-      wx.pageScrollTo({
-        scrollTop: 0,
-        duration: 300
-      })
-    },
-    queryChange (region, inputVal, salary, workYear, companySize, financeStage) {
-      let regionStr = '';
-      if (region[2] && region[2] !== '全部') {
-        regionStr = region[2];
-      } else if (region[1] && region[1] !== '全部') {
-        regionStr = region[1];
-      }
-      this.currRegion = regionStr;
-      this.currInput = inputVal;
-      this.currSalary = salary.value;
-      this.currWorkYear = workYear.value;
-      this.currCompanySize = companySize.value;
-      this.currFinanceStage = financeStage.value;
-      // console.log(currRegion, inputVal, salary.value, workYear.value, companySize.value, financeStage.value);
-      this.refreshList();
-    },
     clickHandler(id, e) {
       var url = "../detail/main?id=" +id
       wx.navigateTo({url})
     },
     getList() {
-      const self = this;
       this.pageNo += 1;
+      const self = this;
       let pageNo = this.pageNo;
       // let pageSize = this.pageSize;
       this.$httpWX.post({
-        url: '/wx/pageList',
+        url: '/wx/pageListByCompany',
         data: {
-          pageNo,
-          currRegion: this.currRegion,
-          currInput: this.currInput,
-          currSalary: this.currSalary,
-          currWorkYear: this.currWorkYear,
-          currCompanySize: this.currCompanySize,
-          currFinanceStage: this.currFinanceStage
+          pageNo: pageNo,
+          companyId: self.companyId
         }
       }).then(res => {
         if (res.success) {
@@ -166,6 +120,7 @@ export default {
               })
             })
           }
+
           this.list = [...this.list, ...res.result.data]
         }
       })
@@ -173,23 +128,13 @@ export default {
     refreshList() {
       const self = this;
       this.$httpWX.post({
-        url: '/wx/pageList',
+        url: '/wx/pageListByCompany',
         data: {
           pageNo: 1,
-          currRegion: this.currRegion,
-          currInput: this.currInput,
-          currSalary: this.currSalary,
-          currWorkYear: this.currWorkYear,
-          currCompanySize: this.currCompanySize,
-          currFinanceStage: this.currFinanceStage
+          companyId: self.companyId
         }
       }).then(res => {
-        res = JSON.parse(JSON.stringify(res).replace(/[\r\n]|\s+/g, ''));
-        console.log(res);
         if (res.success) {
-          if (res.result.total === 0) {
-            console.log('无数据')
-          }
           res.result.data.forEach((curr, index, arr) => {
             curr.formatTime = this.$timestamp(curr.formatTime)
             salaryArr.forEach((item) => {
@@ -213,7 +158,7 @@ export default {
               }
             })
           })
-          self.list = res.result.data;
+          this.list = res.result.data
         }
       })
     }
@@ -221,7 +166,7 @@ export default {
 
   async onPullDownRefresh() {
     console.log('下拉刷新')
-    this.refreshList();
+    this.refreshList(this.companyId);
     wx.stopPullDownRefresh();
   },
   onReachBottom: function () {
@@ -230,7 +175,9 @@ export default {
   },
 
   mounted () {
-    this.refreshList();
+    const query = this.$root.$mp.query;
+    this.companyId = query.id;
+    this.refreshList()
   },
 
   created () {
@@ -238,7 +185,7 @@ export default {
   },
 
   onLoad(){
-    // Object.assign(this.$data, this.$options.data())
+    Object.assign(this.$data, this.$options.data())
   }
 }
 </script>
@@ -246,22 +193,37 @@ export default {
 <style lang='less' scoped>
 .body {
   // font-family: 'Microsoft YaHei';
-  #backToTop{
-    width: 60rpx;
-    height: 60rpx;
-    background-color: #14c4bb;
-    color: white;
-    padding: 10rpx 0 18rpx 10rpx;
-    right: 0;
-    position: fixed; //固定按钮在屏幕上的位置
-    bottom: 2.5%;
-    text-align: center;
-    z-index: 100;
-    font-size: 12px;
-    border-radius: 12px 0 0 12px;
+  .page-header {
+    padding: 20rpx 20rpx;
+    width: 100vw;
+    // height: 300rpx;
+    position: relative;
+    z-index: 99;
+    border-bottom: 2rpx solid #d7d6dc;
+    background: #FFFFFF;
+    .company-img-box {
+      display: inline-block;
+      img {
+        border: 1rpx #d4d4d4 solid;
+        width: 80rpx;
+        height: 80rpx;
+      }
+    }
+    .company-info {
+      display: inline-block;
+      margin-left: 20rpx;
+      position: absolute;
+      // top: 18rpx;
+      .company-name {
+        font-size: 14px;
+      }
+      .company-label {
+        font-size: 12px;
+        color: #666666;
+      }
+    }
   }
   .main-scroll-container {
-    // margin-top: 140rpx;
     .scroll-view-item {
       background: #e0e0e0;
       padding: 2rpx 0;
@@ -309,31 +271,31 @@ export default {
             font-size: 10px;
           }
         }
-        .item-footer {
-          padding: 20rpx 0 10rpx 0;
-          position: relative;
-          .company-img-box {
-            display: inline-block;
-            img {
-              border: 1rpx #d4d4d4 solid;
-              width: 80rpx;
-              height: 80rpx;
-            }
-          }
-          .company-info {
-            display: inline-block;
-            margin-left: 20rpx;
-            position: absolute;
-            // top: 18rpx;
-            .company-name {
-              font-size: 14px;
-            }
-            .company-label {
-              font-size: 12px;
-              color: #666666;
-            }
-          }
-        }
+        // .item-footer {
+        //   padding: 20rpx 0 10rpx 0;
+        //   position: relative;
+        //   .company-img-box {
+        //     display: inline-block;
+        //     img {
+        //       border: 1rpx #d4d4d4 solid;
+        //       width: 80rpx;
+        //       height: 80rpx;
+        //     }
+        //   }
+        //   .company-info {
+        //     display: inline-block;
+        //     margin-left: 20rpx;
+        //     position: absolute;
+        //     // top: 18rpx;
+        //     .company-name {
+        //       font-size: 14px;
+        //     }
+        //     .company-label {
+        //       font-size: 12px;
+        //       color: #666666;
+        //     }
+        //   }
+        // }
       }
     }
     .no-data-tip {
@@ -346,67 +308,5 @@ export default {
       font-size: 16px;
     }
   }
-  // .top {
-  //   position: fixed;
-  //   bottom: 40rpx;
-  //   right: 20rpx;
-  //   background: #FFF;
-  //   border-radius: 50rpx;
-  //   .top-icon {
-  //     width: 100rpx;
-  //     height: 100rpx;
-  //   }
-  // }
 }
-
-/* .userinfo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.userinfo-avatar {
-  width: 128rpx;
-  height: 128rpx;
-  margin: 20rpx;
-  border-radius: 50%;
-}
-
-.userinfo-nickname {
-  color: #aaa;
-}
-
-.usermotto {
-  margin-top: 150px;
-}
-
-.form-control {
-  display: block;
-  padding: 0 12px;
-  margin-bottom: 5px;
-  border: 1px solid #ccc;
-}
-.all{
-  width:7.5rem;
-  height:1rem;
-  background-color:blue;
-}
-.all:after{
-  display:block;
-  content:'';
-  clear:both;
-}
-.left{
-  float:left;
-  width:3rem;
-  height:1rem;
-  background-color:red;
-}
-
-.right{
-  float:left;
-  width:4.5rem;
-  height:1rem;
-  background-color:green;
-} */
 </style>

@@ -30,9 +30,17 @@
     <div class="work_addr">
       <div class="title">公司信息</div>
       <div class="addr-text">
-        <p>{{data.workAddr}}</p>
+        <p>{{data.workAddr}}<span v-on:click="clickCopyWorkAddr" style="color: #14c4bb">&emsp;复制</span></p>
       </div>
-      <div class="company-card" v-on:click="clickCopyCompanyUrlHandler">
+      <map
+        id="map"
+        :longitude="location.lng"
+        :latitude="location.lat"
+        :markers="markers"
+        scale="15"
+        style="width: 100%; height: 300px;"
+      ></map>
+      <div class="company-card" v-on:click="clickToCompanyPageHandler">
         <div class="company-info">
           <p class="company-name">{{data.companyName}}</p>
           <p class="company-label">{{data.financeStage}} | {{data.companySize}} | <span v-for="(item, index) in data.industryField" :key='index'>{{item}}</span></p>
@@ -84,7 +92,20 @@ export default {
       data: {
       },
       isColled: false,
-      isLogined: false
+      isLogined: false,
+      location: {
+        lng: 120.19,
+        lat: 30.26
+      },
+      markers: [{
+        id: 0,
+        latitude: 30.26,
+        longitude: 120.19,
+        name: '地址',
+        iconPath: '/static/images/coordinates.png',
+        width: 50,
+        height: 50
+      }],
     }
   },
 
@@ -153,14 +174,31 @@ export default {
         }
       })
     },
-    clickCopyCompanyUrlHandler(e) {
+    clickToCompanyPageHandler(e) {
+      const companyId = this.data.companyId;
+      var url = "../company/main?id="+companyId;
+      wx.navigateTo({url})
+      // wx.setClipboardData({
+      //   data: this.data.companyUrl,
+      //   success: function (res) {
+      //     wx.getClipboardData({
+      //       success: function (res) {
+      //         wx.showToast({
+      //           title: '复制公司链接'
+      //         })
+      //       }
+      //     })
+      //   }
+      // })
+    },
+    clickCopyWorkAddr(e) {
       wx.setClipboardData({
-        data: this.data.companyUrl,
+        data: this.data.workAddr,
         success: function (res) {
           wx.getClipboardData({
             success: function (res) {
               wx.showToast({
-                title: '复制公司链接'
+                title: '复制公司地址'
               })
             }
           })
@@ -233,6 +271,41 @@ export default {
         }
       }).then(jobId => {
         self.getCollectionStatus(jobId);
+        if (self.data.isComplete) {
+          const addrStr = self.data.workAddr;
+          self.getBaiduLocation(addrStr);
+        }
+      })
+    },
+    getBaiduLocation(addrStr) {
+      const self = this;
+      let ak = 'bngYWdoBrDGyZ3WLVoRbxlWv6o1ZncSU';
+      let url = `http://api.map.baidu.com/geocoder/v2/`
+      wx.request({
+        url,
+        data:{
+          address: addrStr,
+          ret_coordtype: 'gcj02ll',
+          ak,
+          output:'json'
+        },
+        success:(res)=>{
+          if (res.data.status === 0) {
+            const lat = res.data.result.location.lat;
+            const lng = res.data.result.location.lng;
+            self.location.lat = lat;
+            self.location.lng = lng;
+            self.markers.splice(0, 1,{
+              id: 0,
+              latitude: lat,
+              longitude: lng,
+              name: '地址',
+              iconPath: '/static/images/coordinates_red.png',
+              width: 50,
+              height: 50
+            })
+          }
+        }
       })
     }
   },
@@ -338,6 +411,7 @@ export default {
     }
     .addr-text {
       font-size: 14px;
+      padding-bottom: 10rpx;
       a {
         display: inline-block;
       }
@@ -377,6 +451,7 @@ export default {
     background: #FFF;
     padding: 16rpx 20rpx 0 20rpx;
     box-shadow: -2rpx 0 5rpx #888888;
+    z-index: 100;
     &>div {
       display: inline-block;
       // position: absolute;

@@ -23,6 +23,11 @@
         <span>收藏</span>
         <img class="btn-icon next" src="/static/images/next.png" >
       </div>
+      <div class="history" v-on:click="historyHandler">
+        <img class="btn-icon" src="/static/images/createtask.png" >
+        <span>历史</span>
+        <img class="btn-icon next" src="/static/images/next.png" >
+      </div>
       <div class="about" v-on:click="settingHandler">
         <img class="btn-icon" src="/static/images/setting.png">
         <span>设置</span>
@@ -162,6 +167,20 @@ export default {
       if (this.userInfo.nickName) {
         wx.navigateTo({
           url: "../collection/main"
+        })
+      } else {
+        wx.showToast({
+          title: '请先登录',
+          icon: 'none',
+          duration: 500,
+          mask:true
+        })
+      }
+    },
+    historyHandler() {
+      if (this.userInfo.nickName) {
+        wx.navigateTo({
+          url: "../history/main"
         })
       } else {
         wx.showToast({

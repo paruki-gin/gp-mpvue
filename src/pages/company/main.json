@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "公司职位表",
+  "navigationBarTextStyle": "white",
+  "navigationBarTextColor": "#ffffff",
+  "enablePullDownRefresh": true,
+  "navigationBarBackgroundColor": "#14c4bb",
+  "backgroundColor": "#14c4bb",
+  "backgroundTextStyle": "dark"
+}

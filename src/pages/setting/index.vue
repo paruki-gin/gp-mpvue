@@ -2,7 +2,7 @@
   <div class="body">
     <div class="door">
       <div class="" v-on:click="clearDataHandler">
-        <span>清除数据</span>
+        <span>清除浏览历史</span>
         <img class="btn-icon next" src="/static/images/next.png" >
       </div>
       <div class="collection" v-on:click="logoutHandler">
@@ -27,14 +27,33 @@ export default {
 
   methods: {
     clearDataHandler() {
-      setTimeout(function() {
+      //clearUserHistory
+      this.$httpWX.get({
+        url: "/wx/clearUserHistory"
+      }).then((res) => {
         wx.showToast({
           title: '已清除数据',
           icon: 'none',
           duration: 1500,
           mask:true
         })
-      }, 500);
+      }).catch(err => {
+        console.log(err);
+        wx.showToast({
+          title: '未知错误',
+          icon: 'none',
+          duration: 1500,
+          mask:true
+        })
+      })
+      // setTimeout(function() {
+      //   wx.showToast({
+      //     title: '已清除数据',
+      //     icon: 'none',
+      //     duration: 1500,
+      //     mask:true
+      //   })
+      // }, 500);
     },
     logoutHandler() {
       const self = this;

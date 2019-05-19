@@ -9,13 +9,13 @@
               <span class="salary">{{item.jobs.salary}}</span>
             </div>
             <div class="item-header-sm">
-              <span class="area-year-edu">{{item.jobs.area}} | {{item.jobs.workYear}} | {{item.jobs.education}} </span>
-              <span class="date">{{item.jobs.formatTime}}</span>
+              <span class="area-year-edu">{{item.jobs.companyName}}</span>
+              <span class="date">查看时间： {{item.timestamp}}</span>
             </div>
-            <div class="item-label">
+            <!-- <div class="item-label">
               <span v-for="(i,idx) in item.jobs.industryLables" :key="idx">{{i}}</span>
-            </div>
-            <div class="item-footer">
+            </div> -->
+            <!-- <div class="item-footer">
               <div class="company-img-box">
                 <img :src="item.jobs.companyLogo">
               </div>
@@ -23,12 +23,12 @@
                 <p class="company-name">{{item.jobs.companyName}}</p>
                 <p class="company-label">{{item.jobs.financeStage}} | {{item.jobs.companySize}} | <span v-for="(i,idx) in item.jobs.industryField" :key="idx">{{i}} </span></p>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
       <div v-else>
-        <div class="no-data-tip">暂无收藏记录</div>
+        <div class="no-data-tip">暂无历史记录</div>
       </div>
     </div>
   </div>
@@ -67,7 +67,7 @@ export default {
       let pageNo = this.pageNo;
       // let pageSize = this.pageSize;
       this.$httpWX.post({
-        url: '/wx/pageCollectionList',
+        url: '/wx/pageUserHistoryList',
         data: {
           pageNo: pageNo
         }
@@ -83,68 +83,67 @@ export default {
             self.pageNo -=1
           } else {
             res.result.data.forEach((curr, index, arr) => {
-              curr.updateTime = this.$timestamp(curr.updateTime)
+              curr.timestamp = this.$timestamp(curr.timestamp)
               let currJob = curr.jobs;
-              currJob.formatTime = this.$timestamp(currJob.formatTime)
+              // currJob.formatTime = this.$timestamp(currJob.formatTime)
               salaryArr.forEach((item) => {
                 if (item.value === currJob.salary) {
                   currJob.salary = item.label
                 }
               })
-              workYearArr.forEach((item) => {
-                if (item.value === currJob.workYear) {
-                  currJob.workYear = item.label
-                }
-              })
-              companySizeArr.forEach((item) => {
-                if (item.value === currJob.companySize) {
-                  currJob.companySize = item.label
-                }
-              })
-              financeStageArr.forEach((item) => {
-                if (item.value === currJob.financeStage) {
-                  currJob.financeStage = item.label
-                }
-              })
+              // workYearArr.forEach((item) => {
+              //   if (item.value === currJob.workYear) {
+              //     currJob.workYear = item.label
+              //   }
+              // })
+              // companySizeArr.forEach((item) => {
+              //   if (item.value === currJob.companySize) {
+              //     currJob.companySize = item.label
+              //   }
+              // })
+              // financeStageArr.forEach((item) => {
+              //   if (item.value === currJob.financeStage) {
+              //     currJob.financeStage = item.label
+              //   }
+              // })
             })
           }
-
           this.list = [...this.list, ...res.result.data]
         }
       })
     },
     refreshList() {
       this.$httpWX.post({
-        url: '/wx/pageCollectionList',
+        url: '/wx/pageUserHistoryList',
         data: {
           pageNo: 1
         }
       }).then(res => {
         if (res.success) {
           res.result.data.forEach((curr, index, arr) => {
-            curr.updateTime = this.$timestamp(curr.updateTime)
+            curr.timestamp = this.$timestamp(curr.timestamp)
             let currJob = curr.jobs;
-            currJob.formatTime = this.$timestamp(currJob.formatTime)
+            // currJob.formatTime = this.$timestamp(currJob.formatTime)
             salaryArr.forEach((item) => {
               if (item.value === currJob.salary) {
                 currJob.salary = item.label
               }
             })
-            workYearArr.forEach((item) => {
-              if (item.value === currJob.workYear) {
-                currJob.workYear = item.label
-              }
-            })
-            companySizeArr.forEach((item) => {
-              if (item.value === currJob.companySize) {
-                currJob.companySize = item.label
-              }
-            })
-            financeStageArr.forEach((item) => {
-              if (item.value === currJob.financeStage) {
-                currJob.financeStage = item.label
-              }
-            })
+            // workYearArr.forEach((item) => {
+            //   if (item.value === currJob.workYear) {
+            //     currJob.workYear = item.label
+            //   }
+            // })
+            // companySizeArr.forEach((item) => {
+            //   if (item.value === currJob.companySize) {
+            //     currJob.companySize = item.label
+            //   }
+            // })
+            // financeStageArr.forEach((item) => {
+            //   if (item.value === currJob.financeStage) {
+            //     currJob.financeStage = item.label
+            //   }
+            // })
           })
           this.list = res.result.data
         }

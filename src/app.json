@@ -6,7 +6,9 @@
     "pages/my/main",
     "pages/setting/main",
     "pages/about/main",
-    "pages/collection/main"
+    "pages/collection/main",
+    "pages/history/main",
+    "pages/company/main"
   ],
   "window": {
     "backgroundTextStyle": "light",
