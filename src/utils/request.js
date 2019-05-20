@@ -2,9 +2,11 @@ const host = 'http://192.168.123.1:3000/api'
 
 function request (url, method, data, header = {}) {
   // const sessionId = wx.getStorageSync('sessionId');
-  wx.showLoading({
-    title: '加载中'
-  })
+  if (url.indexOf('/wx/getUserInfo') === -1) {
+    wx.showLoading({
+      title: '加载中'
+    })
+  }
   let user_token;
   //获取本地token
   user_token = wx.getStorageSync('user_token')

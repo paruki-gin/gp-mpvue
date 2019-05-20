@@ -183,7 +183,9 @@ export default {
 
     bindRegionChange(e) {
       console.log(e.mp.detail.value)
-      if (e.mp.detail.value[1] === '全部') {
+      if (e.mp.detail.value[0] === '全部' && e.mp.detail.value[1] === '全部' &&e.mp.detail.value[2] === '全部') {
+        this.region = ' ';
+      } else if (e.mp.detail.value[1] === '全部') {
         wx.showToast({
           title: '请选择城市或地区',
           icon: 'none',
