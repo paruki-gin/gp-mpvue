@@ -72,8 +72,23 @@ const companySizeArr = [
     label: '500-2000人',
     value: '4',
   },{
-    label: '2000人以上',
-    value: '5',
+    label: '0-20人',
+    value: '6',
+  },{
+    label: '20-99人',
+    value: '7',
+  },{
+    label: '100-499人',
+    value: '8',
+  },{
+    label: '500-999人',
+    value: '9',
+  },{
+    label: '1000-9999人',
+    value: '10',
+  },{
+    label: '10000人以上',
+    value: '11',
   }
 ];
 const financeStageArr = [

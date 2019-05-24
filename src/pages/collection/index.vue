@@ -163,11 +163,15 @@ export default {
   },
 
   mounted () {
-    this.refreshList()
+    // this.refreshList()
   },
 
   created () {
     let app = getApp()
+  },
+
+  onShow() {
+    this.refreshList()
   },
 
   onLoad(){

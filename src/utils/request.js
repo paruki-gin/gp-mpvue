@@ -1,4 +1,6 @@
-const host = 'http://192.168.123.1:3000/api'
+// const host = 'http://192.168.123.1:3000/api'
+// const host = 'http://192.168.43.5:3000/api'
+const host = 'http://172.17.162.240:3000/api'
 
 function request (url, method, data, header = {}) {
   // const sessionId = wx.getStorageSync('sessionId');
@@ -11,7 +13,7 @@ function request (url, method, data, header = {}) {
   //获取本地token
   user_token = wx.getStorageSync('user_token')
   return new Promise((resolve, reject) => {
-    wx.request({
+    wx.request({ 
       url: host + url,
       method: method,
       data: data,

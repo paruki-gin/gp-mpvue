@@ -156,10 +156,11 @@ export default {
     getGeo () {
       let self = this;
       let ak = 'bngYWdoBrDGyZ3WLVoRbxlWv6o1ZncSU';
-      let url = `http://api.map.baidu.com/geocoder/v2/`
+      let url = `http://api.map.baidu.com/geocoder/v2/`;
       wx.getLocation({
         type: 'wgs84',
         success: geo => {
+          console.log('geo', geo);
           wx.request({
             url,
             data:{
@@ -168,6 +169,7 @@ export default {
               location:`${geo.latitude},${geo.longitude}`
             },
             success:(res)=>{
+              console.log(res)
               if (res.data.status === 0) {
                 self.region.splice(0, 1, res.data.result.addressComponent.province)
                 self.region.splice(1, 1, res.data.result.addressComponent.city)
@@ -177,6 +179,9 @@ export default {
               }
             }
           })
+        },
+        fail: err => {
+          console.log('fail', err)
         }
       })
     },

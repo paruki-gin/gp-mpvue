@@ -185,7 +185,7 @@ export default {
         }
       }).then(res => {
         res = JSON.parse(JSON.stringify(res).replace(/[\r\n]|\s+/g, ''));
-        console.log(res);
+        // console.log(res);
         if (res.success) {
           if (res.result.total === 0) {
             console.log('无数据')
